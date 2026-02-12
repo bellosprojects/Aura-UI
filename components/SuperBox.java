@@ -1,13 +1,16 @@
 package components;
 
+import components.Transition.AnimationType;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.Area;
 import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.*;
-
-import components.Transition.AnimationType;
 
 public class SuperBox extends JPanel {
 
@@ -37,9 +40,16 @@ public class SuperBox extends JPanel {
     //scala
     private float scale = 1.0f;
 
+    //shadow
+    private Color shadowColor = new Color(0, 0, 0, 100);
+    private int shadowSize = 0;
+    private float shadowOffsetX = 0;
+    private float shadowOffsetY = 0;
+
     //Bordes
     private Color StrokeColor = new Color(200, 200, 200);
     private float strokeWidth = 0f;
+    private boolean[] paintedStrokes = new boolean[]{true, true, true, true};
     
     //Comportamientos con Mouse
     private boolean isHovered = false;
@@ -54,6 +64,36 @@ public class SuperBox extends JPanel {
     //Animaciones
     private final List<Transition> timers = new ArrayList<>();
     private final List<AnimationType> timersTypes = new ArrayList<>();
+
+    private final Map<Component, Point> absoluteComponents = new HashMap<>();
+
+    public void addAt(Component comp, int x, int y) {
+        absoluteComponents.put(comp, new Point(x, y));
+        super.add(comp); 
+        revalidate();
+        repaint();
+    }
+
+    @Override
+    public void doLayout(){
+
+        super.doLayout();
+
+        for (Map.Entry<Component, Point> entry : absoluteComponents.entrySet()) {
+            Component comp = entry.getKey();
+            Point pos = entry.getValue();
+
+            Insets insets = getInsets();
+            
+            comp.setBounds(
+                insets.left + pos.x, 
+                insets.top + pos.y, 
+                comp.getPreferredSize().width, 
+                comp.getPreferredSize().height
+            );
+        }
+
+    }
 
     public void addTimer(Transition timer, AnimationType type, boolean cancel){
         
@@ -101,10 +141,7 @@ public class SuperBox extends JPanel {
         return this.scale;
     }
 
-    public SuperBox(LayoutManager layout){
-
-        layout = (layout != null)? layout : new FlowLayout(FlowLayout.CENTER, 0, 0);
-        setLayout(layout);
+    public SuperBox(){
 
         setOpaque(false);
         this.backgroundColors.add(new Color(255, 255, 255));
@@ -168,9 +205,9 @@ public class SuperBox extends JPanel {
         repaint();
     }
 
-    public void setStroke(Color color, float widht){
+    public void setStroke(Color color, float width){
         this.StrokeColor = color;
-        this.strokeWidth = widht;
+        this.strokeWidth = width;
         repaint();
     }
 
@@ -220,6 +257,23 @@ public class SuperBox extends JPanel {
 
     public boolean[] getFlatCorners(){
         return this.flatCorners;
+    }
+
+    public void setPaintStrokes(boolean all){
+        setPaintStrokes(all, all, all, all);
+    }
+
+    public void setPaintStrokes(boolean top, boolean bottom){
+        setPaintStrokes(top, top, bottom, bottom);
+    }
+
+    public void setPaintStrokes(boolean top, boolean left, boolean bottom, boolean right){
+        this.paintedStrokes = new boolean[]{top, left, bottom, right};
+        repaint();
+    }
+
+    public boolean[] getPaintStrokes(){
+        return this.paintedStrokes;
     }
 
     public Insets getMargin(){
@@ -279,10 +333,82 @@ public class SuperBox extends JPanel {
         repaint();
     }
 
+    public void setShadow(Color color, int size){
+        this.shadowColor = color;
+        this.shadowSize = size;
+        repaint();
+    }
+
+    public void setShadowOffset(float offsetX, float offsetY){
+        this.shadowOffsetX = offsetX;
+        this.shadowOffsetY = offsetY;
+        repaint();
+    }
+
+    private void drawShadow(Graphics2D g2, Shape shape) {
+        if (shadowSize <= 0) return;
+
+        Graphics2D gShadow = (Graphics2D) g2.create();
+        gShadow.clip(shape);
+        
+        // Desplazamos la sombra según el offset definido
+        gShadow.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        gShadow.translate(shadowOffsetX, shadowOffsetY);
+
+        // Dibujamos capas sucesivas para crear el efecto de suavizado (Blur)
+        for (int i = shadowSize * 4; i >= 1; i--) {
+            // La opacidad disminuye conforme nos alejamos del centro
+            float opacity_ = (float) (shadowColor.getAlpha() / (shadowSize / 100.0));
+            gShadow.setColor(new Color(shadowColor.getRed(), shadowColor.getGreen(), shadowColor.getBlue(), (int) Math.max(Math.min((opacity_ / 100), 254), 1)));
+            
+            // El grosor del trazo simula el desenfoque
+            gShadow.setStroke(new BasicStroke(i));
+            gShadow.draw(shape);
+        }
+        
+        gShadow.dispose();
+    }
+
+    private void drawStrokes(Graphics2D g2, Shape shape, float x, float y, float width, float height) {
+        if (strokeWidth <= 0) return;
+
+        Graphics2D gStroke = (Graphics2D) g2.create();
+        gStroke.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        gStroke.setPaint(StrokeColor);
+
+
+        float cX = x + (width) / 2f;
+        float cY = y + (height) / 2f;
+
+        // El área de recorte sigue siendo la silueta original (shape)
+        Area clipArea = new Area(new Rectangle2D.Float(x, y, width + 1f, height + 1f));
+
+        // Restamos los cuadrantes que NO queremos ver
+        if (!this.paintedStrokes[0]) clipArea.subtract(new Area(createTriangle(x, y, x+width, y, cX, cY))); // Top
+        if (!this.paintedStrokes[1]) clipArea.subtract(new Area(createTriangle(x, y, x, y+height, cX, cY))); // Bottom
+        if (!this.paintedStrokes[2]) clipArea.subtract(new Area(createTriangle(x, y + height + 1, x + width + 1, y+height + 1, cX, cY))); // Left
+        if (!this.paintedStrokes[3]) clipArea.subtract(new Area(createTriangle(x+width + 1, y, x+width + 1, y+height + 1, cX, cY))); // Right
+
+        gStroke.setClip(clipArea);
+        gStroke.setStroke(new BasicStroke(strokeWidth));
+        
+        // Dibujamos el shape original
+        gStroke.draw(shape);
+
+        gStroke.dispose();
+    }
+
+    private Path2D createTriangle(float x, float y, float x2, float y2, float cx, float cy) {
+        Path2D p = new Path2D.Float();
+        p.moveTo(x, y);
+        p.lineTo(x2, y2);
+        p.lineTo(cx, cy);
+        p.closePath();
+        return p;
+    }
+
     @Override
     protected void paintComponent(Graphics g){
-
-        super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -299,20 +425,21 @@ public class SuperBox extends JPanel {
 
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
 
+        
         Insets insets = (getBorder() != null) ? getBorder().getBorderInsets(this) : new Insets(0,0,0,0);
-
+        
         int width = getWidth() - insets.left - insets.right;
         int height = getHeight() - insets.top - insets.bottom;
-
+        
         int x = insets.left;
         int y = insets.top;
-
+        
         
         shapePath = new Path2D.Float();
         shapePath.moveTo(x + radios[0], y);
 
         shapePath.lineTo(x+ width - radios[1], y); // Top
-
+        
         if (this.flatCorners[1]){
             shapePath.lineTo(x + width, y + radios[1]);
         }else {
@@ -320,7 +447,7 @@ public class SuperBox extends JPanel {
         }
 
         shapePath.lineTo(x + width, y + height - radios[3]); // Right
-
+        
         if(this.flatCorners[3]){
             shapePath.lineTo(x + width- radios[3], y + height);
         } else {
@@ -349,12 +476,13 @@ public class SuperBox extends JPanel {
         for(int i =0; i < this.backgroundColors.size(); i ++ ){
             colors[i] = this.backgroundColors.get(i);
         }
-
+        
         float[] fractions = new float[this.backgroundFractions.size()];
         for(int i =0; i < this.backgroundFractions.size(); i ++ ){
             fractions[i] = this.backgroundFractions.get(i);
         }
 
+        
         if (this.backgroundColors.size() > 1){
             float angleRad = (float) Math.toRadians(this.backgroundAngle);
             float cos = (float) Math.cos(angleRad);
@@ -362,7 +490,7 @@ public class SuperBox extends JPanel {
 
             // 1. Calcular la longitud necesaria para que el gradiente cubra el área
             float length = Math.abs(width * cos) + Math.abs(height * sin);
-
+            
             // 2. Centrar el degradado en el medio del componente
             float centerX = x + width / 2f;
             float centerY = y + height / 2f;
@@ -372,27 +500,23 @@ public class SuperBox extends JPanel {
             float startY = centerY - (length / 2f) * sin + backgroundOffsetY * height;
             float endX = centerX + (length / 2f) * cos + backgroundOffsetX * width;
             float endY = centerY + (length / 2f) * sin + backgroundOffsetY * height;
-
+            
             Paint background = new LinearGradientPaint(
                 startX, startY,
                 endX, endY,
                 fractions,
                 colors
             );
-
+            
             g2.setPaint(background);
         } else {
             g2.setColor(this.backgroundColors.get(0));
         }
         
         g2.fill(shapePath);
-
-        if (strokeWidth > 0){
-            g2.setPaint(StrokeColor);
-            g2.setStroke(new BasicStroke(strokeWidth));
-
-            g2.draw(shapePath);
-        }
+        drawShadow(g2, shapePath);
+        
+        drawStrokes(g2, shapePath, x, y, width, height);
 
         g2.dispose();
     }

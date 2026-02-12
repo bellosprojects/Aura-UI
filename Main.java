@@ -1,7 +1,4 @@
 import components.SuperBox;
-import components.Transition;
-import components.Transition.AnimationType;
-
 import java.awt.*;
 import javax.swing.*;
 
@@ -13,43 +10,28 @@ public class Main {
         frame.setSize(900, 700);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
-        frame.setLayout(new FlowLayout());
-        frame.setBackground(new Color(255, 255, 255));
+        frame.setLayout(new BorderLayout());
+        frame.setBackground(new Color(255, 255,255));
 
-        SuperBox item = new SuperBox(null);
-        item.setBg(new Color(250, 213, 170));
-        item.setMargin(20, 30, 20, 30);
-        item.setPadding(10, 20);
-        item.setRadius(15);
-        item.addBg(new Color(210, 200, 150), 1f);
-        item.setStroke(new Color(0, 0, 0, 50), 2);
-        item.setBackgroundAngle(180);
-        item.setDetectChildrensHover(true);
-        item.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        SuperBox container = new SuperBox();
+        container.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        container.setBg(new Color(2, 12, 25));
 
-        JLabel text = new JLabel("Bello's Projects");
-        text.setFont(new Font("SansfSerif", Font.BOLD, 20));
+        SuperBox caja = new SuperBox();
+        caja.setBg(new Color(0, 0, 0, 200));
+        caja.setPadding(10, 20);
+        caja.setRadius(0, 0, 15, 0);
 
-        item.add(text);
+        JLabel texto = new JLabel("Hola");
+        texto.setForeground(Color.white);
+        texto.setFont(new Font("SansSerif", Font.BOLD, 25));
 
-        item.addHoverAction(isHovered -> {
+        caja.add(texto);
 
+        container.add(caja);
 
-            float start = item.getOffset()[1];
-            float end = isHovered? -4 : 0;
+        frame.add(container, BorderLayout.CENTER);
 
-            item.addTimer(
-                new Transition(start, end, 200, value -> {
-                    item.setOffset(0, value);
-                    item.setScale(value / -40 + 1);
-                }),
-                AnimationType.MOVE,
-                true
-            );
-        });
-
-
-        frame.add(item);
         
         frame.setVisible(true);
         
