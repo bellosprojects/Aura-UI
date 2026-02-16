@@ -1,56 +1,56 @@
 package src.main.java.aura.layouts;
 
 import java.awt.*;
-import src.main.java.aura.core.Box;
+import src.main.java.aura.core.AuraBox;
 import src.main.java.aura.core.Layout;
 
-public class SGrid extends Layout<SGrid> {
+public class AuraGrid extends Layout<AuraGrid> {
     
     private int rows;
     private int cols;
     private int hGap = 0;
     private int vGap = 0;
 
-    public SGrid(int rows, int cols){
+    public AuraGrid(int rows, int cols){
         this.rows = rows;
         this.cols = cols;
         setLayout(null);
         addMouseEvents();
     }
 
-    public SGrid rows(int r){
+    public AuraGrid rows(int r){
         this.rows = r;
         revalidate();
         return this;
     }
 
-    public SGrid cols(int c){
+    public AuraGrid cols(int c){
         this.cols = c;
         revalidate();
         return this;
     }
 
-    public SGrid gap(int g){
+    public AuraGrid gap(int g){
         this.hGap = g;
         this.vGap = g;
         revalidate();
         return this;
     }
 
-    public SGrid gap(int h, int v){
+    public AuraGrid gap(int h, int v){
         this.vGap = v;
         this.hGap = h;
         revalidate();
         return this;
     }
 
-    public SGrid padding(int all){
+    public AuraGrid padding(int all){
         this.setPadding(all, all, all, all);
         return this;
     }
 
-    public SGrid radius(int all){
-        this.setRadius(all, all, all, all);
+    public AuraGrid radius(int all){
+        this.radius(all, all, all, all);
         return this;
     }
 
@@ -66,8 +66,8 @@ public class SGrid extends Layout<SGrid> {
         boolean[][] occupied = new boolean[rows][cols];
 
         for (Component child : getComponents()) {
-            if (!child.isVisible() || !(child instanceof Box)) continue;
-            Box<?> box = (Box<?>) child;
+            if (!child.isVisible() || !(child instanceof AuraBox)) continue;
+            AuraBox<?> box = (AuraBox<?>) child;
 
             int cs = box.getColSpan();
             int rs = box.getRowSpan();

@@ -2,41 +2,31 @@ package src.main.java.aura.layouts;
 
 import java.awt.*;
 import src.main.java.aura.core.Layout;
-import src.main.java.aura.core.Box;
+import src.main.java.aura.core.AuraBox;
 
-public class SRow extends Layout<SRow> {
+public class AuraColumn extends Layout<AuraColumn> {
 
-    public SRow(){
-        addMouseEvents();
+    public AuraColumn(){
         setLayout(null);
+        addMouseEvents();
     }
 
-    public SRow gap(int gap){
+    public AuraColumn gap(int gap){
         this.gap = gap;
         revalidate();
         repaint();
         return this;
     }
 
-    public SRow align(Alignment align){
+    public AuraColumn align(Alignment align){
         this.alignment = align;
         revalidate();
         return this;
     }
 
-
-    public SRow padding(int all){
+    public AuraColumn padding(int all){
         this.setPadding(all, all, all, all);
-        return this;
-    }
-
-    public SRow radius(float all){
-        this.setRadius(all, all, all, all);
-        return this;
-    }
-
-    public SRow margin(int all){
-        this.setMargin(all, all, all, all);
+        revalidate();
         return this;
     }
 
@@ -44,46 +34,46 @@ public class SRow extends Layout<SRow> {
     public void doLayout() {
         Insets in = getInsets();
         Component[] children = getComponents();
-        int totalWidth = getWidth() - in.left - in.right;
-        int availableHeight = getHeight() - in.top - in.bottom;
+        int totalHeight = getHeight() - in.top - in.bottom;
+        int availableWidth = getWidth() - in.left - in.right;
 
-        int fixedWidth = 0;
+        int fixedHeight = 0;
         float totalWeight = 0;
         int visibleCount = 0;
 
         for (Component c : children) {
             if (!c.isVisible()) continue;
-            Box<?> box = (Box<?>) c;
+            AuraBox<?> box = (AuraBox<?>) c;
             if (box.getWeight() > 0) {
                 totalWeight += box.getWeight();
             } else {
-                fixedWidth += c.getPreferredSize().width;
+                fixedHeight += c.getPreferredSize().height;
             }
             visibleCount++;
         }
 
         int gapSpace = (visibleCount > 1) ? (visibleCount - 1) * gap : 0;
-        int remainingWidth = totalWidth - fixedWidth - gapSpace;
+        int remainingHeight = totalHeight - fixedHeight - gapSpace;
 
-        int currentX = in.left;
+        int currentY = in.top;
         for (Component c : children) {
             if (!c.isVisible()) continue;
-            Box<?> box = (Box<?>) c;
+            AuraBox<?> box = (AuraBox<?>) c;
             Dimension d = c.getPreferredSize();
             
-            int finalWidth = d.width;
-            if (box.getWeight() > 0 && remainingWidth > 0) {
-                finalWidth = (int) ((box.getWeight() / totalWeight) * remainingWidth);
+            int finalHeight = d.height;
+            if (box.getWeight() > 0 && remainingHeight > 0) {
+                finalHeight = (int) ((box.getWeight() / totalWeight) * remainingHeight);
             }
 
-            int y = switch (alignment) {
-                case CENTER -> in.top + (availableHeight - d.height) / 2;
-                case BOTTOM -> in.top + (availableHeight - d.height);
-                default -> in.top;
+            int x = switch (alignment) {
+                case CENTER -> in.left + (availableWidth - d.width) / 2;
+                case RIGHT -> in.left + (availableWidth - d.width);
+                default -> in.left;
             };
 
-            c.setBounds(currentX, y, finalWidth, d.height);
-            currentX += finalWidth + gap;
+            c.setBounds(x, currentY, d.width, finalHeight);
+            currentY += finalHeight + gap;
         }
     }
 
@@ -98,14 +88,14 @@ public class SRow extends Layout<SRow> {
         for(Component child : getComponents()){
             if(child.isVisible()){
                 Dimension d = child.getPreferredSize();
-                height = Math.max(height, d.height);
-                width += d.width;
+                width = Math.max(width, d.width);
+                height += d.height;
                 visibleChildren ++;
             }
         }
 
         if(visibleChildren > 1){
-            width += (visibleChildren - 1) * gap;
+            height += (visibleChildren - 1) * gap;
         }
 
         return new Dimension(
@@ -113,4 +103,5 @@ public class SRow extends Layout<SRow> {
             height + in.top + in.bottom
         );
     }
+
 }

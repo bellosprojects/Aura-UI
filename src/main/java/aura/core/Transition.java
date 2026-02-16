@@ -17,7 +17,7 @@ public abstract class Transition {
     private boolean pingPong = false;
     private Transition serieT;
     private Transition parallelT;
-    private Box<?> component;
+    private AuraBox<?> component;
     private boolean cancel = false;
     private TransitionFloatStep step;
 
@@ -52,7 +52,7 @@ public abstract class Transition {
     private TransitionType type;
     private AnimationType animationType;
 
-    public void setup(float initial, float target, int ms, TransitionFloatStep step, Box<?> component, TransitionType type){
+    public void setup(float initial, float target, int ms, TransitionFloatStep step, AuraBox<?> component, TransitionType type){
         this.startVal = initial;
         this.endVal = target;
         this.duration = ms;

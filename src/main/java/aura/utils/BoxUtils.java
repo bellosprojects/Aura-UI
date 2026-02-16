@@ -1,6 +1,7 @@
 package src.main.java.aura.utils;
 
 import java.awt.geom.*;
+import java.awt.*;
 
 public class BoxUtils {
     
@@ -11,6 +12,13 @@ public class BoxUtils {
         p.lineTo(cx, cy);
         p.closePath();
         return p;
+    }
+
+    public static void setHighQuality(Graphics2D g2) {
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
     }
 
 }

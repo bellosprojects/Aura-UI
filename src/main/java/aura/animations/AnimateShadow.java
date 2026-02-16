@@ -1,13 +1,13 @@
 package src.main.java.aura.animations;
 
 import java.awt.Color;
-import src.main.java.aura.core.Box;
+import src.main.java.aura.core.AuraBox;
 import src.main.java.aura.core.Transition;
 import src.main.java.aura.utils.MathUtils;
 
 public class AnimateShadow extends Transition {
     
-    public AnimateShadow(Box<?> component, Color toColor, int toSize, int ms){
+    public AnimateShadow(AuraBox<?> component, Color toColor, int toSize, int ms){
 
         Color initial = component.getShadowColor();
         float initialSize = component.getShadowSize();
@@ -15,7 +15,7 @@ public class AnimateShadow extends Transition {
         initialize(component, initial, initialSize, toColor, toSize, ms);
     }
 
-    private void initialize(Box<?> component, Color initialColor, float initialSize, Color toColor, int toSize, int ms){
+    private void initialize(AuraBox<?> component, Color initialColor, float initialSize, Color toColor, int toSize, int ms){
         setup(0f, 1f, ms, value -> {
 
             Color c = new Color(

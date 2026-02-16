@@ -41,10 +41,14 @@ SRow searchBar = new SRow().gap(15).padding(20).content(row -> {
 });
 ```
 
+## 🖼️ Media Support
+- Background Overloading: Soporte nativo para fondos de imagen con recorte automático según el radio de los bordes. Compatible con el motor de opacidad y transformaciones.
+
 ## 🏗 Instalación y Requisitos
 Java 17 o superior (LTS recomendado).
 
-Sin dependencias externas.
+***Sin dependencias externas.***
 
-Bash
+```Bash
 git clone https://github.com/bellosprojects/Aura.git
+```

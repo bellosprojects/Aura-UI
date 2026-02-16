@@ -1,15 +1,15 @@
 package src.main.java.aura.animations;
 
 import src.main.java.aura.core.Transition;
-import src.main.java.aura.core.Box;
+import src.main.java.aura.core.AuraBox;
 
 public class AnimateWobble extends Transition {
 
-    public AnimateWobble(Box<?> component, int intensity, int ms){
+    public AnimateWobble(AuraBox<?> component, int intensity, int ms){
         initialize(component, component.getAnchorX(), component.getAnchorY(), intensity, ms);
     }
 
-    private void initialize(Box<?> component, float initialX, float initialY, int intensity, int ms){
+    private void initialize(AuraBox<?> component, float initialX, float initialY, int intensity, int ms){
 
         setup(0, 0, 0, value -> {}, component, TransitionType.LINEAR);
 

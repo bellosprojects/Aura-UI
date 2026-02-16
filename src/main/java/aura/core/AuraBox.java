@@ -10,11 +10,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.*;
+
 import src.main.java.aura.core.Transition.AnimationType;
 import src.main.java.aura.utils.BoxUtils;
+import src.main.java.aura.utils.MathUtils;
 
 @SuppressWarnings ("unchecked")
-public abstract class Box<T extends Box<T>> extends JPanel {
+public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
+
+    protected Image backgroundImage = null;
+    protected boolean scaleBackground = true;
+
+    public T background(Image img){
+        this.backgroundImage = img;
+        repaint();
+        return (T) this;
+    }
 
     private float anchorX = 0.5f;
     private float anchorY = 0.5f;
@@ -50,7 +61,7 @@ public abstract class Box<T extends Box<T>> extends JPanel {
 
     protected  void addMouseEvents(){
 
-        Box<T> self = this;
+        AuraBox<T> self = this;
 
         MouseAdapter mouseHandler = new MouseAdapter() {
             @Override
@@ -244,7 +255,7 @@ public abstract class Box<T extends Box<T>> extends JPanel {
         return this.scale;
     }
 
-    protected Box(){
+    protected AuraBox(){
 
         setOpaque(false);
         this.backgroundColors.add(new Color(255, 255, 255));
@@ -296,9 +307,10 @@ public abstract class Box<T extends Box<T>> extends JPanel {
         return new float[]{offsetX, offsetY};
     }
 
-    protected void setRadius(float tl, float tr, float bl, float br){
+    public T radius(float tl, float tr, float bl, float br){
         this.radios = new float[]{tl, tr, bl, br};
         repaint();
+        return (T) this;
     }
 
     protected Insets getRadius(){
@@ -412,8 +424,7 @@ public abstract class Box<T extends Box<T>> extends JPanel {
 
         Graphics2D gShadow = (Graphics2D) g2.create();
         
-        // Desplazamos la sombra según el offset definido
-        gShadow.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        BoxUtils.setHighQuality(gShadow);
         gShadow.translate(shadowOffsetX, shadowOffsetY);
 
         double centerX = getWidth() / 2.0;
@@ -424,11 +435,13 @@ public abstract class Box<T extends Box<T>> extends JPanel {
 
         gShadow.setClip(shape);
 
+        float change = shadowColor.getAlpha() / (shadowSize);
+
         // Dibujamos capas sucesivas para crear el efecto de suavizado (Blur)
         for (float i = shadowSize; i >= 1; i--) {
             // La opacidad disminuye conforme nos alejamos del centro
-            float opacity_ = (float) (shadowColor.getAlpha() / (shadowSize / 100.0));
-            gShadow.setPaint(new Color(shadowColor.getRed(), shadowColor.getGreen(), shadowColor.getBlue(), (int) Math.max(Math.min((opacity_ / 100), 254), 1)));
+            float opacity_ = (float) (change * (i + 1));
+            gShadow.setPaint(new Color(shadowColor.getRed(), shadowColor.getGreen(), shadowColor.getBlue(), (int) MathUtils.clamp(opacity_, 0, 255)));
             
             // El grosor del trazo simula el desenfoque
             gShadow.setStroke(new BasicStroke(i));
@@ -442,7 +455,7 @@ public abstract class Box<T extends Box<T>> extends JPanel {
         if (strokeWidth <= 0) return;
 
         Graphics2D gStroke = (Graphics2D) g2.create();
-        gStroke.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        BoxUtils.setHighQuality(gStroke);
         gStroke.setPaint(StrokeColor);
 
 
@@ -473,7 +486,7 @@ public abstract class Box<T extends Box<T>> extends JPanel {
     protected void paintComponent(Graphics g){
 
         Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        BoxUtils.setHighQuality(g2);
 
         g2.translate(offsetX, offsetY);
 
@@ -588,7 +601,22 @@ public abstract class Box<T extends Box<T>> extends JPanel {
         }
         
         drawShadow(g2, shapePath);
-        g2.fill(shapePath);
+
+        if (backgroundImage != null) {
+            
+            Graphics2D gImg = (Graphics2D) g2.create();
+            BoxUtils.setHighQuality(gImg);
+            gImg.setClip(shapePath);
+
+            if(scaleBackground){
+                gImg.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+            } else {
+                gImg.drawImage(backgroundImage, 0, 0, this);
+            }
+
+        } else {
+            g2.fill(shapePath);
+        }
         
         drawStrokes(g2, shapePath, x, y, width, height);
 
@@ -694,5 +722,16 @@ public abstract class Box<T extends Box<T>> extends JPanel {
 
     public float getShadowOffsetY(){
         return this.shadowOffsetY;
+    }
+
+    public T size(int width, int height){
+
+        int w = width + getMargin().left + getMargin().right;
+        int h = height + getMargin().top + getMargin().bottom;
+
+        this.setPreferredSize(new Dimension(w, h));
+        this.setMinimumSize(new Dimension(w, h));
+        this.setMaximumSize(new Dimension(w, h));
+        return (T) this;
     }
 }

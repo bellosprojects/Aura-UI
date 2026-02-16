@@ -3,7 +3,7 @@ package src.main.java.aura.core;
 import java.util.function.Consumer;
 
 @SuppressWarnings ("unchecked")
-public class Layout<T extends Layout<T>> extends Box<T> {
+public class Layout<T extends Layout<T>> extends AuraBox<T> {
     
     protected  int gap = 0;
     protected Alignment alignment = Alignment.CENTER;
