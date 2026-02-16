@@ -1,6 +1,5 @@
-package components;
+package src.main.java.aura.core;
 
-import components.Transition.AnimationType;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Area;
@@ -11,8 +10,87 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.*;
+import src.main.java.aura.core.Transition.AnimationType;
+import src.main.java.aura.utils.BoxUtils;
 
-public class SuperBox extends JPanel {
+@SuppressWarnings ("unchecked")
+public abstract class Box<T extends Box<T>> extends JPanel {
+
+    private float anchorX = 0.5f;
+    private float anchorY = 0.5f;
+
+    public T anchor(float x, float y){
+        this.anchorX = x;
+        this.anchorY = y;
+        return (T) this;
+    }
+
+    public float getAnchorX(){
+        return anchorX;
+    }
+
+    public float getAnchorY(){
+        return anchorY;
+    }
+
+    private float weight = 0;
+
+    public T weight(float w){
+        this.weight = w;
+        if(getParent() != null) getParent().revalidate();
+        return (T) this;
+    }
+
+    public float getWeight(){
+        return this.weight;
+    }
+
+    protected final List<HoverAction<T>> hoverActions = new ArrayList<>();
+    protected final List<ClickAction<T>> clickActions = new ArrayList<>();
+
+    protected  void addMouseEvents(){
+
+        Box<T> self = this;
+
+        MouseAdapter mouseHandler = new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e){
+                if(checkHover(e.getPoint())){
+                    updateHover(!isHovered);
+                    for(HoverAction<T> action : hoverActions){
+                        action.onHover((T) self , isHovered);
+                    }
+                }
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                updateHover(false);
+            }
+            @Override
+            public void mouseReleased(MouseEvent e){
+                if(checkClick(e.getPoint())){
+                    for(ClickAction<T> action : clickActions){
+                        action.onClick((T) self);
+                    }
+                }
+            }
+        };
+
+        addMouseListener(mouseHandler);
+        addMouseMotionListener(mouseHandler);
+    }
+
+    public T onClick(ClickAction<T> action){
+        this.clickActions.add(action);
+        return (T) this;
+    }
+
+    public T onHover(HoverAction<T> action){
+        this.hoverActions.add(action);
+        return (T) this;
+    }
+
+    private boolean bgType = false; //false = lineal, true = radial
 
     //Esquinas planas o redondeadas
     private float[] radios = new float[4];
@@ -37,12 +115,21 @@ public class SuperBox extends JPanel {
     private float offsetX = 0;
     private float offsetY = 0;
 
+    //rotacion
+    private float angle = 0;
+
+    //Para SGrid
+    private int colSpan = 1;
+    private int rowSpan = 1;
+
     //scala
     private float scale = 1.0f;
 
+    protected boolean isHovered = false;
+
     //shadow
     private Color shadowColor = new Color(0, 0, 0, 100);
-    private int shadowSize = 0;
+    private float shadowSize = 0;
     private float shadowOffsetX = 0;
     private float shadowOffsetY = 0;
 
@@ -50,22 +137,56 @@ public class SuperBox extends JPanel {
     private Color StrokeColor = new Color(200, 200, 200);
     private float strokeWidth = 0f;
     private boolean[] paintedStrokes = new boolean[]{true, true, true, true};
-    
-    //Comportamientos con Mouse
-    private boolean isHovered = false;
-    private final List<HoverAction> hoverActions = new ArrayList<>();
-    private final List<ClickAction> clickActions = new ArrayList<>();
 
     //Comportamiento con hijos
     private boolean clipChildrens = false;
-    private boolean detectChildrensHover = false;
-    private boolean detectChildrensClick = false;
 
     //Animaciones
     private final List<Transition> timers = new ArrayList<>();
     private final List<AnimationType> timersTypes = new ArrayList<>();
 
     private final Map<Component, Point> absoluteComponents = new HashMap<>();
+
+    public static enum Backgrounds {
+
+        RADIAL,
+        LINEAR
+
+    };
+
+
+    public T colSpan(int s){
+        this.colSpan = s;
+        return (T) this;
+    }
+
+    public T rowSpan(int s){
+        this.rowSpan = s;
+        return (T) this;
+    }
+
+    public int getRowSpan(){
+        return this.rowSpan;
+    }
+
+    public int getColSpan(){
+        return this.colSpan;
+    }
+
+    protected void setBgType(boolean ty){
+        this.bgType = ty;
+    }
+
+    public T rotate(float angle){
+        this.angle = angle;
+        revalidate();
+        repaint();
+        return (T) this;
+    }
+
+    public float getRotation(){
+        return this.angle;
+    }
 
     public void addAt(Component comp, int x, int y) {
         absoluteComponents.put(comp, new Point(x, y));
@@ -95,41 +216,23 @@ public class SuperBox extends JPanel {
 
     }
 
-    public void addTimer(Transition timer, AnimationType type, boolean cancel){
-        
-        if(cancel){
-            for(int i = 0; i < timers.size(); i ++){
-                if(timersTypes.get(i) == type){
-                    timers.get(i).stop();
-                    timers.remove(i);
-                    timersTypes.remove(i);
-                }
-            }
-        }
+    @Override
+    public Dimension getPreferredSize(){
+        Dimension d = super.getPreferredSize();
 
-        timer.start();
-        timers.add(timer);
-        timersTypes.add(type);
+        if(angle == 0) return d;
+
+        double rad = Math.toRadians(Math.abs(angle));
+        int w = (int) (d.width * Math.cos(rad) + d.height * Math.sin(rad));
+        int h = (int) (d.width * Math.sin(rad) + d.height * Math.cos(rad));
+
+        return new Dimension(w, h);
     }
 
-    public void addHoverAction(HoverAction action){
-        this.hoverActions.add(action);
-    }
-
-    public void addClickAction(ClickAction action){
-        this.clickActions.add(action);
-    }
-
-    public void setClipChildrens(boolean clipChildrens){
+    public T clipChildrens(boolean clipChildrens){
         this.clipChildrens = clipChildrens;
-    }
-
-    public void setDetectChildrensHover(boolean detect){
-        this.detectChildrensHover = detect;
-    }
-
-    public void setDetectChildrensClick(boolean detect){
-        this.detectChildrensClick = detect;
+        repaint();
+        return (T) this;
     }
 
     public void setScale(float scale){
@@ -141,47 +244,25 @@ public class SuperBox extends JPanel {
         return this.scale;
     }
 
-    public SuperBox(){
+    protected Box(){
 
         setOpaque(false);
         this.backgroundColors.add(new Color(255, 255, 255));
         this.backgroundFractions.add(0.0f);
 
-        MouseAdapter mouseHandler = new MouseAdapter() {
-            @Override
-            public  void mouseMoved(MouseEvent e){
-                checkHover(e.getPoint());
-            }
-            @Override
-            public void mouseExited(MouseEvent e) {
-                updateHover(false);
-            }
-            @Override
-            public void mouseReleased(MouseEvent e){
-                checkClick(e.getPoint());
-            }
-        };
-
-        addMouseListener(mouseHandler);
-        addMouseMotionListener(mouseHandler);
     }
 
-    private void checkClick(Point p){
+    protected boolean checkClick(Point p){
 
         Point adjustedPoint = new Point(
             (int)(p.x - offsetX),
             (int)(p.y - offsetY)
         );
 
-        if(shapePath != null && shapePath.contains(adjustedPoint)){
-            List<ClickAction> copy = new ArrayList<>(clickActions);
-            for(ClickAction action : copy){
-                action.onClick();
-            }
-        }
+        return (shapePath != null && shapePath.contains(adjustedPoint));
     }
 
-    private void checkHover(Point p){
+    protected boolean checkHover(Point p){
 
         Point adjustedPoint = new Point(
             (int)(p.x - offsetX),
@@ -189,124 +270,99 @@ public class SuperBox extends JPanel {
         );
 
         boolean contains = (shapePath != null && shapePath.contains(adjustedPoint));
-        if (contains != isHovered){
-            updateHover(contains);
-        }
+        return contains != isHovered;
     }
 
-    private void updateHover(boolean hover){
+    protected void updateHover(boolean hover){
         this.isHovered = hover;
-        
-        List<HoverAction> copy = new ArrayList<>(hoverActions);
-        for(HoverAction action: copy){
-            action.onHover(hover);
-        }
-
         repaint();
     }
 
-    public void setStroke(Color color, float width){
+    public T stroke(Color color, float width){
         this.StrokeColor = color;
         this.strokeWidth = width;
         repaint();
+        return (T) this;
     }
 
-    public void setOffset(float x, float y){
+    public T offset(float x, float y){
         this.offsetX = x;
         this.offsetY = y;
         repaint();
+        return (T) this;
     }
 
-    public float[] getOffset(){
+    protected float[] getOffset(){
         return new float[]{offsetX, offsetY};
     }
 
-    public void setRadius(float all){
-        setRadius(all, all, all, all);
-    }
-
-    public void setRadius(float top, float bottom){
-        setRadius(top, top, bottom, bottom);
-    }
-
-    public void setRadius(float tl, float tr, float bl, float br){
+    protected void setRadius(float tl, float tr, float bl, float br){
         this.radios = new float[]{tl, tr, bl, br};
         repaint();
     }
 
-    public Insets getRadius(){
+    protected Insets getRadius(){
         return new Insets((int) this.radios[0], (int) this.radios[1], (int) this.radios[2], (int) this.radios[3]);
     }
 
-    public Insets getPadding(){
+    protected Insets getPadding(){
         return new Insets((int) this.padding[0], (int) this.padding[1], (int) this.padding[2], (int) this.padding[3]);
     }
 
-    public void setFlatCorners(boolean all){
-        setFlatCorners(all, all, all, all);
-    }
-
-    public void setFlatCorners(boolean top, boolean bottom){
-        setFlatCorners(top, top, bottom, bottom);
-    }
-
-    public void setFlatCorners(boolean tl, boolean tr, boolean bl, boolean br){
+    protected void setFlatCorners(boolean tl, boolean tr, boolean bl, boolean br){
         this.flatCorners = new boolean[]{tl, tr, bl, br};
         repaint();
     }
 
-    public boolean[] getFlatCorners(){
+    protected boolean[] getFlatCorners(){
         return this.flatCorners;
     }
 
-    public void setPaintStrokes(boolean all){
-        setPaintStrokes(all, all, all, all);
-    }
-
-    public void setPaintStrokes(boolean top, boolean bottom){
-        setPaintStrokes(top, top, bottom, bottom);
-    }
-
-    public void setPaintStrokes(boolean top, boolean left, boolean bottom, boolean right){
+    protected void setPaintStrokes(boolean top, boolean left, boolean bottom, boolean right){
         this.paintedStrokes = new boolean[]{top, left, bottom, right};
         repaint();
     }
 
-    public boolean[] getPaintStrokes(){
+    protected boolean[] getPaintStrokes(){
         return this.paintedStrokes;
     }
 
-    public Insets getMargin(){
+    protected Insets getMargin(){
         return new Insets((int) this.margin[0], (int) this.margin[1], (int) this.margin[2], (int) this.margin[3]);
     }
 
-    public void setBg(Color color){
+    public T background(Color color){
         this.backgroundColors.clear();
         this.backgroundFractions.clear();
         this.backgroundColors.add(color);
         this.backgroundFractions.add(0.0f);
         repaint();
+        return (T) this;
     }
 
-    public void addBg(Color color, float position){
+    protected void addBg(Color color, float position){
         this.backgroundColors.add(color);
         this.backgroundFractions.add(position);
         repaint();
     }
 
-    public void setBackgroundColorAtIndex(Color color, int index){
+    public Color getBg(){
+        return this.backgroundColors.get(0);
+    }
+
+    protected void setBackgroundColorAtIndex(Color color, int index){
         if(index < 0 || index >= this.backgroundColors.size()) return;
         this.backgroundColors.set(index, color);
         repaint();
     }
 
-    public void setBackgroundFractionAtIndex(float fraction, int index){
+    protected void setBackgroundFractionAtIndex(float fraction, int index){
         if(index < 0 || index >= this.backgroundColors.size()) return;
         this.backgroundFractions.set(index, fraction);
         repaint();
     }
 
-    public void setBackgroundAtIndex(Color color, float fraction, int index){
+    protected void setBackgroundAtIndex(Color color, float fraction, int index){
         if(index < 0 || index >= this.backgroundColors.size()) return;
         this.backgroundFractions.set(index, fraction);
         this.backgroundColors.set(index, color);
@@ -314,32 +370,38 @@ public class SuperBox extends JPanel {
     }
 
     public void setOpacity(float alpha){
+        if(alpha > 1f || alpha < 0f) return;
         this.opacity = alpha;
         repaint();
     }
 
-    public void setBackgroundAngle(float angle){
+    public float getOpacity(){
+        return this.opacity;
+    }
+
+    protected void setBackgroundAngle(float angle){
         this.backgroundAngle = angle;
         repaint();
     }
 
-    public void setBackgroundOffsetX(float offsetX){
-        this.backgroundOffsetX = offsetX;
-        repaint();
+    public float getBackgroundAngle(){
+        return this.backgroundAngle;
     }
 
-    public void setBackgroundOffsetY(float offsetY){
+    protected void setBackgroundOffset(float offsetX, float offetY){
+        this.backgroundOffsetX = offsetX;
         this.backgroundOffsetY = offsetY;
         repaint();
     }
 
-    public void setShadow(Color color, int size){
+    public T shadow(Color color, float size){
         this.shadowColor = color;
         this.shadowSize = size;
         repaint();
+        return (T) this;
     }
 
-    public void setShadowOffset(float offsetX, float offsetY){
+    protected void setShadowOffset(float offsetX, float offsetY){
         this.shadowOffsetX = offsetX;
         this.shadowOffsetY = offsetY;
         repaint();
@@ -349,17 +411,24 @@ public class SuperBox extends JPanel {
         if (shadowSize <= 0) return;
 
         Graphics2D gShadow = (Graphics2D) g2.create();
-        gShadow.clip(shape);
         
         // Desplazamos la sombra según el offset definido
         gShadow.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         gShadow.translate(shadowOffsetX, shadowOffsetY);
 
+        double centerX = getWidth() / 2.0;
+        double centerY = getHeight() / 2.0;
+        gShadow.translate(centerX, centerY);
+        gShadow.scale((shadowSize / getWidth()) + 1, (shadowSize / getHeight()) + 1);
+        gShadow.translate(-centerX, -centerY);
+
+        gShadow.setClip(shape);
+
         // Dibujamos capas sucesivas para crear el efecto de suavizado (Blur)
-        for (int i = shadowSize * 4; i >= 1; i--) {
+        for (float i = shadowSize; i >= 1; i--) {
             // La opacidad disminuye conforme nos alejamos del centro
             float opacity_ = (float) (shadowColor.getAlpha() / (shadowSize / 100.0));
-            gShadow.setColor(new Color(shadowColor.getRed(), shadowColor.getGreen(), shadowColor.getBlue(), (int) Math.max(Math.min((opacity_ / 100), 254), 1)));
+            gShadow.setPaint(new Color(shadowColor.getRed(), shadowColor.getGreen(), shadowColor.getBlue(), (int) Math.max(Math.min((opacity_ / 100), 254), 1)));
             
             // El grosor del trazo simula el desenfoque
             gShadow.setStroke(new BasicStroke(i));
@@ -384,10 +453,10 @@ public class SuperBox extends JPanel {
         Area clipArea = new Area(new Rectangle2D.Float(x, y, width + 1f, height + 1f));
 
         // Restamos los cuadrantes que NO queremos ver
-        if (!this.paintedStrokes[0]) clipArea.subtract(new Area(createTriangle(x, y, x+width, y, cX, cY))); // Top
-        if (!this.paintedStrokes[1]) clipArea.subtract(new Area(createTriangle(x, y, x, y+height, cX, cY))); // Bottom
-        if (!this.paintedStrokes[2]) clipArea.subtract(new Area(createTriangle(x, y + height + 1, x + width + 1, y+height + 1, cX, cY))); // Left
-        if (!this.paintedStrokes[3]) clipArea.subtract(new Area(createTriangle(x+width + 1, y, x+width + 1, y+height + 1, cX, cY))); // Right
+        if (!this.paintedStrokes[0]) clipArea.subtract(new Area(BoxUtils.createTriangle(x, y, x+width, y, cX, cY))); // Top
+        if (!this.paintedStrokes[1]) clipArea.subtract(new Area(BoxUtils.createTriangle(x, y, x, y+height, cX, cY))); // Bottom
+        if (!this.paintedStrokes[2]) clipArea.subtract(new Area(BoxUtils.createTriangle(x, y + height + 1, x + width + 1, y+height + 1, cX, cY))); // Left
+        if (!this.paintedStrokes[3]) clipArea.subtract(new Area(BoxUtils.createTriangle(x+width + 1, y, x+width + 1, y+height + 1, cX, cY))); // Right
 
         gStroke.setClip(clipArea);
         gStroke.setStroke(new BasicStroke(strokeWidth));
@@ -398,14 +467,7 @@ public class SuperBox extends JPanel {
         gStroke.dispose();
     }
 
-    private Path2D createTriangle(float x, float y, float x2, float y2, float cx, float cy) {
-        Path2D p = new Path2D.Float();
-        p.moveTo(x, y);
-        p.lineTo(x2, y2);
-        p.lineTo(cx, cy);
-        p.closePath();
-        return p;
-    }
+    
 
     @Override
     protected void paintComponent(Graphics g){
@@ -415,12 +477,15 @@ public class SuperBox extends JPanel {
 
         g2.translate(offsetX, offsetY);
 
-        if (scale != 1.0f) {
-            double centerX = getWidth() / 2.0;
-            double centerY = getHeight() / 2.0;
-            g2.translate(centerX, centerY);
+        g2.setClip(null);
+
+        if (scale != 1.0f || angle != 1.0f) {
+            double pivotX = getWidth() * anchorX;
+            double pivotY = getHeight() * anchorY;
+            g2.translate(pivotX, pivotY);
             g2.scale(scale, scale);
-            g2.translate(-centerX, -centerY);
+            g2.rotate(Math.toRadians(this.angle));
+            g2.translate(-pivotX, -pivotY);
         }
 
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
@@ -495,43 +560,45 @@ public class SuperBox extends JPanel {
             float centerX = x + width / 2f;
             float centerY = y + height / 2f;
 
-            // 3. Puntos de inicio y fin proyectados
-            float startX = centerX - (length / 2f) * cos + backgroundOffsetX * width;
-            float startY = centerY - (length / 2f) * sin + backgroundOffsetY * height;
-            float endX = centerX + (length / 2f) * cos + backgroundOffsetX * width;
-            float endY = centerY + (length / 2f) * sin + backgroundOffsetY * height;
+            if(this.bgType){
+
+                Paint background = new RadialGradientPaint(centerX, centerY, (float) Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2)), fractions, colors);
+                g2.setPaint(background);
+
+
+            } else {
+
+                float startX = centerX - (length / 2f) * cos + backgroundOffsetX * width;
+                float startY = centerY - (length / 2f) * sin + backgroundOffsetY * height;
+                float endX = centerX + (length / 2f) * cos + backgroundOffsetX * width;
+                float endY = centerY + (length / 2f) * sin + backgroundOffsetY * height;
+                
+                Paint background = new LinearGradientPaint(
+                    startX, startY,
+                    endX, endY,
+                    fractions,
+                    colors
+                );
+
+                g2.setPaint(background);
+            }
             
-            Paint background = new LinearGradientPaint(
-                startX, startY,
-                endX, endY,
-                fractions,
-                colors
-            );
-            
-            g2.setPaint(background);
         } else {
             g2.setColor(this.backgroundColors.get(0));
         }
         
-        g2.fill(shapePath);
         drawShadow(g2, shapePath);
+        g2.fill(shapePath);
         
         drawStrokes(g2, shapePath, x, y, width, height);
 
         g2.dispose();
     }
 
-    public void setPadding(int all){
-        setPadding(all, all, all, all);
-    }
 
-    public void setPadding(int top_bottom, int left_right){
-        setPadding(top_bottom, left_right, top_bottom, left_right);
-    }
 
-    public void setPadding(int top, int left, int bottom, int right){
+    protected void setPadding(int top, int left, int bottom, int right){
         this.padding = new int[]{top, left, bottom, right};
-        // No usamos setBorder aquí, solo refrescamos el layout
         revalidate();
         repaint();
     }
@@ -549,15 +616,7 @@ public class SuperBox extends JPanel {
         );
     }
 
-    public void setMargin(int all){
-        setMargin(all, all, all, all);
-    }   
-
-    public void setMargin(int top_bottom, int left_right){
-        setMargin(top_bottom, left_right, top_bottom, left_right);
-    }
-
-    public void setMargin(int top, int left, int bottom, int right){
+    protected void setMargin(int top, int left, int bottom, int right){
         setBorder(BorderFactory.createEmptyBorder(top, left, bottom, right));
         this.margin = new int[]{top, left, bottom, right};
         revalidate();
@@ -572,7 +631,15 @@ public class SuperBox extends JPanel {
 
         g2.translate(offsetX, offsetY);
 
-        if(shapePath != null && clipChildrens){
+        double centerX = getWidth() * anchorX;
+        double centerY = getHeight() * anchorY;
+        g2.translate(centerX, centerY);
+        g2.scale(scale, scale);
+        g2.rotate(Math.toRadians(this.angle));
+        g2.translate(-centerX, -centerY);
+
+
+        if(!clipChildrens){
             g2.setClip(shapePath);
         }
 
@@ -581,47 +648,51 @@ public class SuperBox extends JPanel {
 
     }
 
-    @Override
-    protected void addImpl(Component comp, Object constraints, int index){
+    public void animate(Transition transition, boolean cancel){
 
-        super.addImpl(comp, constraints, index);
-
-        MouseAdapter bridgeListener = new MouseAdapter() {
-
-            @Override
-            public void mouseEntered(MouseEvent e){
-                if(detectChildrensHover) handleChildEvent(e);
-            }
-            @Override
-            public void mouseExited(MouseEvent e) {
-                if (detectChildrensHover) handleChildEvent(e);
-            }
-
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                if (detectChildrensHover) handleChildEvent(e);
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (detectChildrensClick) handleChildEvent(e);
-            }
-
-            private void handleChildEvent(MouseEvent e){
-
-                Point parentPoint = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), SuperBox.this);
-
-                if(e.getID() == MouseEvent.MOUSE_RELEASED){
-                    checkClick(parentPoint);
-                } else {
-                    checkHover(parentPoint);
+        if(cancel){
+            for(int i = 0; i < timers.size(); i ++){
+                if(timersTypes.get(i) == transition.getAnimationType()){
+                    timers.get(i).stop(true);
+                    timers.remove(i);
+                    timersTypes.remove(i);
                 }
             }
-        };
+        }
 
-        comp.addMouseListener(bridgeListener);
-        comp.addMouseMotionListener(bridgeListener);
-
+        this.timers.add(transition);
+        this.timersTypes.add(transition.getAnimationType());
     }
 
+    public void cancelAnimations(AnimationType type){
+
+        for(int i = 0; i < timers.size(); i ++){
+            if(timersTypes.get(i) == type){
+                timers.get(i).stop(true);
+                timers.remove(i);
+                timersTypes.remove(i);
+            }
+        }
+        
+    }
+
+    public float getShadowSize(){
+        return this.shadowSize;
+    }
+
+    public Color getShadowColor(){
+        return this.shadowColor;
+    }
+
+    public Shape getShape(){
+        return this.shapePath;
+    }
+
+    public float getShadowOffsetX(){
+        return this.shadowOffsetX;
+    }
+
+    public float getShadowOffsetY(){
+        return this.shadowOffsetY;
+    }
 }
