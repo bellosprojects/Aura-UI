@@ -104,6 +104,9 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
             @Override
             public void mouseExited(MouseEvent e) {
                 updateHover(false);
+                for(HoverAction<T> action : hoverActions){
+                    action.onHover((T) self , false);
+                }
             }
             @Override
             public void mouseReleased(MouseEvent e){
@@ -245,6 +248,10 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         this.clipChildrens = clipChildrens;
         repaint();
         return (T) this;
+    }
+
+    public boolean getClipChild(){
+        return this.clipChildrens;
     }
 
     public T scale(float scale){
@@ -518,14 +525,13 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g){
-
+        
         Graphics2D g2 = (Graphics2D) g.create();
         BoxUtils.setHighQuality(g2);
-
+        
         g2.translate(offsetX, offsetY);
-
-        g2.setClip(null);
-
+        
+        
         if (scale != 1.0f || angle != 1.0f) {
             double pivotX = getWidth() * anchorX;
             double pivotY = getHeight() * anchorY;
@@ -534,9 +540,9 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
             g2.rotate(Math.toRadians(this.angle));
             g2.translate(-pivotX, -pivotY);
         }
-
+        
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-
+        
         
         Insets insets = (getBorder() != null) ? getBorder().getBorderInsets(this) : new Insets(0,0,0,0);
         
@@ -549,7 +555,7 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         
         shapePath = new Path2D.Float();
         shapePath.moveTo(x + radios[0], y);
-
+        
         shapePath.lineTo(x+ width - radios[1], y); // Top
         
         if (this.flatCorners[1]){
@@ -557,7 +563,7 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         }else {
             shapePath.quadTo(x + width, y, x + width, y + radios[1]); // TR
         }
-
+        
         shapePath.lineTo(x + width, y + height - radios[3]); // Right
         
         if(this.flatCorners[3]){
@@ -567,22 +573,25 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         }
 
         shapePath.lineTo(x + radios[2], y + height); // Bottom
-
+        
         if(this.flatCorners[2]){
             shapePath.lineTo(x, y + height - radios[2]);
         } else {
             shapePath.quadTo(x, y + height, x, y + height - radios[2]); // BL
         }
-
+        
         shapePath.lineTo(x, y + radios[0]); // Left
-
+        
         if(this.flatCorners[0]){
             shapePath.lineTo(x + radios[0], y);
         } else {
             shapePath.quadTo(x, y, x + radios[0], y); // TL
         }
 
-        shapePath.closePath();
+        if(getParent() instanceof AuraBox){
+            AuraBox<?> parent = (AuraBox<?>) getParent();
+            g2.setClip(parent.getClipChild()? g2.getClip() : null);
+        }
         
         Color[] colors = new Color[this.backgroundColors.size()];
         for(int i =0; i < this.backgroundColors.size(); i ++ ){
@@ -599,22 +608,22 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
             float angleRad = (float) Math.toRadians(this.backgroundAngle);
             float cos = (float) Math.cos(angleRad);
             float sin = (float) Math.sin(angleRad);
-
+            
             // 1. Calcular la longitud necesaria para que el gradiente cubra el área
             float length = Math.abs(width * cos) + Math.abs(height * sin);
             
             // 2. Centrar el degradado en el medio del componente
             float centerX = x + width / 2f;
             float centerY = y + height / 2f;
-
+            
             if(this.bgType){
-
+                
                 Paint background = new RadialGradientPaint(centerX, centerY, (float) Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2)), fractions, colors);
                 g2.setPaint(background);
-
-
+                
+                
             } else {
-
+                
                 float startX = centerX - (length / 2f) * cos + backgroundOffsetX * width;
                 float startY = centerY - (length / 2f) * sin + backgroundOffsetY * height;
                 float endX = centerX + (length / 2f) * cos + backgroundOffsetX * width;
@@ -626,7 +635,7 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
                     fractions,
                     colors
                 );
-
+                
                 g2.setPaint(background);
             }
             
@@ -635,15 +644,15 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         }
         
         drawShadow(g2, shapePath);
-
+        
         if (backgroundImage != null) {
             
             Graphics2D gImg = (Graphics2D) g2.create();
             BoxUtils.setHighQuality(gImg);
-
-
+            
+            
             gImg.setClip(shapePath);
-
+            
             if(scaleBackground){
                 gImg.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
             } else {
@@ -707,7 +716,7 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
     protected void paintChildren(Graphics g){
 
         Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        BoxUtils.setHighQuality(g2);
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
         g2.translate(offsetX, offsetY);
 
@@ -727,11 +736,13 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
             g2.translate(-pivotX, -pivotY);
         }
 
-        if(!clipChildrens){
+        
+        if(shapePath != null && clipChildrens){
             g2.setClip(shapePath);
         }
-        super.paintChildren(g2);
 
+        super.paintChildren(g2);
+        
         g2.dispose();
 
     }
@@ -785,6 +796,11 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
 
     public float getShadowOffsetY(){
         return this.shadowOffsetY;
+    }
+
+    public T cursor(Cursor cursor){
+        this.setCursor(cursor);
+        return (T) this;
     }
 
     public T size(int width, int height){

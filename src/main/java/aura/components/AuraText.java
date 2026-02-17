@@ -6,10 +6,10 @@ import src.main.java.aura.core.AuraBox;
 
 public class AuraText extends AuraBox<AuraText> {
 
-    private final JLabel label;
+    private final JLabel label = new JLabel("");
 
     public AuraText(String text){
-        label = new JLabel(text);
+        label.setText(text);
         label.setOpaque(false);
         add(label);
         background(new Color(0, 0, 0, 0));
@@ -39,6 +39,12 @@ public class AuraText extends AuraBox<AuraText> {
 
     public String getText(){
         return this.label.getText();
+    }
+
+    @Override
+    public Font getFont(){
+        if(this.label == null) return super.getFont();
+        return this.label.getFont();
     }
 
 }

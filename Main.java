@@ -1,5 +1,6 @@
 import java.awt.Color;
-import src.main.java.aura.components.AuraMultiText;
+import java.awt.Font;
+import src.main.java.aura.components.AuraSelect;
 import src.main.java.aura.components.AuraWindow;
 
 public class Main {
@@ -9,15 +10,15 @@ public class Main {
     public static void main(String[] args) {
         
         new AuraWindow("Aura UI")
-            .fullScreen()
+            .size(200, 500)
             .noResizable()
             .background(new Color(5, 15, 23))
             .display()
             .content(window -> {
 
-                AuraMultiText mt = new AuraMultiText("holaa").fillWidth();
-
-                window.insert(mt);
+                window.insert(
+                    new AuraSelect("Button", "Text", "MultiText", "Input", "Select", "Image", "Spacer").font(new Font("Arial", Font.PLAIN, 20))
+                );
 
             });
         
