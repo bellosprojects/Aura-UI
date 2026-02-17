@@ -29,16 +29,27 @@ SGrid: Implementa una matriz de ocupación booleana para calcular automáticamen
 Crear una barra de búsqueda moderna con un campo flexible es tan sencillo como esto:
 
 ```Java
-SRow searchBar = new SRow().gap(15).padding(20).content(row -> {
-    // Icono fijo
-    row.add(new SContainer().size(40, 40).background(Color.GRAY).radius(10));
-    
-    // Campo expandible (Weight 1)
-    row.add(new SContainer().weight(1).background(Color.WHITE).radius(10));
-    
-    // Botón con sombra
-    row.add(new SContainer().size(100, 40).background(Color.BLUE).shadow(10, Color.BLACK));
-});
+AuraRow searchBar = new AuraRow()
+            .gap(20)
+            .background(new Color(0, 0, 0, 100))
+            .padding(10)
+            .radius(20)
+            .margin(10)
+            .content(row -> {
+
+                row.add( new AuraImage("lupa.png").size(40, 40) );
+
+                row.add(
+                    new AuraInput()
+                    .weight(1f)
+                    .textColor(Color.white)
+                    .background(new Color(0,0,0,0))
+                    .font(new Font("Arial", Font.PLAIN, 25))
+                );
+
+                row.add( new AuraButton("Buscar") );
+
+            });
 ```
 
 ## 🖼️ Media Support
@@ -50,5 +61,5 @@ Java 17 o superior (LTS recomendado).
 ***Sin dependencias externas.***
 
 ```Bash
-git clone https://github.com/bellosprojects/Aura.git
+git clone https://github.com/bellosprojects/Aura-UI.git
 ```

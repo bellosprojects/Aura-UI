@@ -1,7 +1,6 @@
 package src.main.java.aura.components;
 
 import java.awt.*;
-
 import javax.swing.JTextField;
 import src.main.java.aura.core.AuraBox;
 
@@ -9,13 +8,13 @@ public class AuraInput extends AuraBox<AuraInput> {
 
     private final JTextField input;
 
-    public AuraInput(int width){
-        input = new JTextField(width);
+    public AuraInput(){
+        input = new JTextField();
         input.setOpaque(false);
         input.setBorder(null);
         input.setBackground(new Color(0,0,0,0));
-        setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
-        add(input);
+        setLayout(new BorderLayout());
+        add(input, BorderLayout.CENTER);
     }
 
     public AuraInput font(Font font){
@@ -33,6 +32,14 @@ public class AuraInput extends AuraBox<AuraInput> {
 
     public String getText(){
         return this.input.getText();
+    }
+
+    @Override
+        public void setBounds(int x, int y, int width, int height) {
+        super.setBounds(x, y, width, height);
+        if (input != null) {
+            input.revalidate(); 
+        }
     }
     
 }
