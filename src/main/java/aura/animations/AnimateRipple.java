@@ -21,6 +21,8 @@ public class AnimateRipple extends Transition {
 
         pingPong();
 
+        animationType(AnimationType.SCALE);
+
         type(TransitionType.EASE_IN);
 
         serie(
@@ -28,13 +30,16 @@ public class AnimateRipple extends Transition {
             new AnimateScale(component, initialScale + ((maximus - initialScale) / 2f), ms / 4)
             .pingPong()
             .cancelPrev(true)
+            .animationType(AnimationType.SCALE)
             .serie(
                 new AnimateScale(component, initialScale + ((maximus - initialScale) / 4f), ms / 6)
                     .pingPong()
+                    .animationType(AnimationType.SCALE)
                     .cancelPrev(true)
                     .serie(
                         new AnimateScale(component, initialScale + ((maximus - initialScale) / 8f), ms /  8)
                             .pingPong()
+                            .animationType(AnimationType.SCALE)
                             .cancelPrev(true)
                             .then(() -> {
                                 component.setScale(initialScale);

@@ -16,6 +16,7 @@ public class AuraGrid extends Layout<AuraGrid> {
         this.cols = cols;
         setLayout(null);
         addMouseEvents();
+        background(new Color(0,0,0,0));
     }
 
     public AuraGrid rows(int r){
@@ -30,6 +31,7 @@ public class AuraGrid extends Layout<AuraGrid> {
         return this;
     }
 
+    @Override
     public AuraGrid gap(int g){
         this.hGap = g;
         this.vGap = g;
@@ -41,16 +43,6 @@ public class AuraGrid extends Layout<AuraGrid> {
         this.vGap = v;
         this.hGap = h;
         revalidate();
-        return this;
-    }
-
-    public AuraGrid padding(int all){
-        this.setPadding(all, all, all, all);
-        return this;
-    }
-
-    public AuraGrid radius(int all){
-        this.radius(all, all, all, all);
         return this;
     }
 

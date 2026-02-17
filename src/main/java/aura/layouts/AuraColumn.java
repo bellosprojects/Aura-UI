@@ -6,26 +6,22 @@ import src.main.java.aura.core.AuraBox;
 
 public class AuraColumn extends Layout<AuraColumn> {
 
+    public static enum Alignment {
+        CENTER,
+        LEFT,
+        RIGHT
+    }
+
+    private Alignment alignment = Alignment.CENTER;
+
     public AuraColumn(){
         setLayout(null);
         addMouseEvents();
-    }
-
-    public AuraColumn gap(int gap){
-        this.gap = gap;
-        revalidate();
-        repaint();
-        return this;
+        background(new Color(0,0,0,0));
     }
 
     public AuraColumn align(Alignment align){
         this.alignment = align;
-        revalidate();
-        return this;
-    }
-
-    public AuraColumn padding(int all){
-        this.setPadding(all, all, all, all);
         revalidate();
         return this;
     }
@@ -66,7 +62,9 @@ public class AuraColumn extends Layout<AuraColumn> {
                 finalHeight = (int) ((box.getWeight() / totalWeight) * remainingHeight);
             }
 
-            int x = switch (alignment) {
+            Alignment finalAlign = (box.getAlignC() != null)? box.getAlignC() : alignment;
+
+            int x = switch (finalAlign) {
                 case CENTER -> in.left + (availableWidth - d.width) / 2;
                 case RIGHT -> in.left + (availableWidth - d.width);
                 default -> in.left;

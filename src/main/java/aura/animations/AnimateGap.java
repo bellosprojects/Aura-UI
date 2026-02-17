@@ -13,13 +13,13 @@ public class AnimateGap extends Transition {
 
         setup(initialGap, toGap, ms, value -> {
 
-            layout.setGap((int) value);
+            layout.gap((int) value);
 
         }, layout, TransitionType.LINEAR);
 
         animationType(AnimationType.GAP);
 
-        then(() -> layout.setGap(initialGap));
+        then(() -> layout.gap(initialGap));
     }
     
 }

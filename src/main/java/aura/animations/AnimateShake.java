@@ -11,7 +11,9 @@ public class AnimateShake extends Transition {
     }
 
     private void initialize(AuraBox<?> component, int intensity, int ms){
-        setup(0f, 1f, ms, value -> { component.offset((float) Math.sin( value * (ms / 10)) * intensity, 0); },component, TransitionType.LINEAR);
+        setup(0f, 1f, ms, value -> { 
+            component.offset((float) Math.sin( value * (ms / 10)) * intensity, 0);
+         },component, TransitionType.LINEAR);
 
         animationType(AnimationType.MOVE);
     }

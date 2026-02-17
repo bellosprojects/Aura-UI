@@ -6,21 +6,14 @@ import java.util.function.Consumer;
 public class Layout<T extends Layout<T>> extends AuraBox<T> {
     
     protected  int gap = 0;
-    protected Alignment alignment = Alignment.CENTER;
 
-    public static enum Alignment {
-        CENTER,
-        TOP,
-        BOTTOM,
-        LEFT,
-        RIGHT
-    }
-
-    public void setGap(int gap){
+    public T gap(int gap){
         this.gap = gap;
         this.revalidate();
         this.repaint();
         this.validate();
+
+        return (T) this;
     }
 
     public int getGap(){

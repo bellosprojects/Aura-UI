@@ -6,32 +6,23 @@ import src.main.java.aura.core.AuraBox;
 
 public class AuraRow extends Layout<AuraRow> {
 
+    public static enum Alignment {
+        CENTER,
+        TOP,
+        BOTTOM
+    }
+
+    private Alignment alignment = Alignment.CENTER;
+
     public AuraRow(){
         addMouseEvents();
         setLayout(null);
-    }
-
-    public AuraRow gap(int gap){
-        this.gap = gap;
-        revalidate();
-        repaint();
-        return this;
+        background(new Color(0,0,0,0));
     }
 
     public AuraRow align(Alignment align){
         this.alignment = align;
         revalidate();
-        return this;
-    }
-
-
-    public AuraRow padding(int all){
-        this.setPadding(all, all, all, all);
-        return this;
-    }
-
-    public AuraRow margin(int all){
-        this.setMargin(all, all, all, all);
         return this;
     }
 
@@ -71,7 +62,9 @@ public class AuraRow extends Layout<AuraRow> {
                 finalWidth = (int) ((box.getWeight() / totalWeight) * remainingWidth);
             }
 
-            int y = switch (alignment) {
+            Alignment finalAlign = (box.getAlignR() != null)? box.getAlignR() : alignment;
+
+            int y = switch (finalAlign) {
                 case CENTER -> in.top + (availableHeight - d.height) / 2;
                 case BOTTOM -> in.top + (availableHeight - d.height);
                 default -> in.top;

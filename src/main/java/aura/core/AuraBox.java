@@ -12,11 +12,34 @@ import java.util.Map;
 import javax.swing.*;
 
 import src.main.java.aura.core.Transition.AnimationType;
+import src.main.java.aura.layouts.AuraColumn;
+import src.main.java.aura.layouts.AuraRow;
 import src.main.java.aura.utils.BoxUtils;
 import src.main.java.aura.utils.MathUtils;
 
 @SuppressWarnings ("unchecked")
 public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
+
+    private AuraColumn.Alignment colAlign = null;
+    private AuraRow.Alignment rowAlign = null;
+
+    public T alignSelf(AuraColumn.Alignment align){
+        this.colAlign = align;
+        return (T) this;
+    }
+
+    public T alignSelf(AuraRow.Alignment align){
+        this.rowAlign = align;
+        return (T) this;
+    }
+
+    public AuraRow.Alignment getAlignR(){
+        return this.rowAlign;
+    }
+
+    public AuraColumn.Alignment getAlignC(){
+        return this.colAlign;
+    }
 
     protected Image backgroundImage = null;
     protected boolean scaleBackground = true;
@@ -305,6 +328,14 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
 
     protected float[] getOffset(){
         return new float[]{offsetX, offsetY};
+    }
+
+    public T radius(float all){
+        return radius(all, all, all, all);
+    }
+
+    public T radius(float top, float bottom){
+        return radius(top, top, bottom, bottom);
     }
 
     public T radius(float tl, float tr, float bl, float br){
@@ -606,6 +637,8 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
             
             Graphics2D gImg = (Graphics2D) g2.create();
             BoxUtils.setHighQuality(gImg);
+
+
             gImg.setClip(shapePath);
 
             if(scaleBackground){
@@ -623,12 +656,19 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         g2.dispose();
     }
 
+    public T padding(int all){
+        return padding(all, all, all, all);
+    }
 
+    public T padding(int top_bottom, int left_right){
+        return padding(top_bottom, left_right, top_bottom, left_right);
+    }
 
-    protected void setPadding(int top, int left, int bottom, int right){
+    public T padding(int top, int left, int bottom, int right){
         this.padding = new int[]{top, left, bottom, right};
         revalidate();
         repaint();
+        return (T) this;
     }
 
     @Override
@@ -644,11 +684,20 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         );
     }
 
-    protected void setMargin(int top, int left, int bottom, int right){
+    public T margin(int all){
+        return margin(all, all, all, all);
+    }
+
+    public T margin(int top_bottom, int left_right){
+        return margin(top_bottom, left_right, top_bottom, left_right);
+    }
+
+    public T margin(int top, int left, int bottom, int right){
         setBorder(BorderFactory.createEmptyBorder(top, left, bottom, right));
         this.margin = new int[]{top, left, bottom, right};
         revalidate();
         repaint();
+        return (T) this;
     }
 
     @Override
@@ -659,19 +708,27 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
 
         g2.translate(offsetX, offsetY);
 
-        double centerX = getWidth() * anchorX;
-        double centerY = getHeight() * anchorY;
-        g2.translate(centerX, centerY);
-        g2.scale(scale, scale);
-        g2.rotate(Math.toRadians(this.angle));
-        g2.translate(-centerX, -centerY);
-
+        if(angle != 0.0f){
+            double pivotX = getWidth() * anchorX;
+            double pivotY = getHeight() * anchorY;
+            g2.translate(pivotX, pivotY);
+            g2.rotate(Math.toRadians(this.angle));
+            g2.translate(-pivotX, -pivotY);
+        }
+        
+        if (scale != 1.0f) {
+            double pivotX = getWidth() / 2;
+            double pivotY = getHeight() / 2;
+            g2.translate(pivotX, pivotY);
+            g2.scale(scale, scale);
+            g2.translate(-pivotX, -pivotY);
+        }
 
         if(!clipChildrens){
             g2.setClip(shapePath);
         }
-
         super.paintChildren(g2);
+
         g2.dispose();
 
     }
@@ -695,7 +752,7 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
     public void cancelAnimations(AnimationType type){
 
         for(int i = 0; i < timers.size(); i ++){
-            if(timersTypes.get(i) == type){
+            if(type == null || timersTypes.get(i) == type){
                 timers.get(i).stop(true);
                 timers.remove(i);
                 timersTypes.remove(i);
