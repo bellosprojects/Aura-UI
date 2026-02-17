@@ -15,7 +15,7 @@ public class AnimateRipple extends Transition {
     private void initialize(AuraBox<?> component, float initialScale, float maximus, int ms){
         setup(initialScale, maximus, ms / 3, value -> {
 
-            component.setScale(value);
+            component.scale(value);
 
         }, component, TransitionType.LINEAR);
 
@@ -42,7 +42,7 @@ public class AnimateRipple extends Transition {
                             .animationType(AnimationType.SCALE)
                             .cancelPrev(true)
                             .then(() -> {
-                                component.setScale(initialScale);
+                                component.scale(initialScale);
                             })
                     )
             )

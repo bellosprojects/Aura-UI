@@ -15,7 +15,7 @@ public class AnimateOpacity extends Transition {
     private void initialize(AuraBox<?> component, float actualOp, float to, int ms){
         setup(actualOp, to, ms, value -> {
 
-            component.setOpacity(value);
+            component.opacity(value);
 
         }, component, TransitionType.LINEAR);
 

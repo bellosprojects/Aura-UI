@@ -8,7 +8,7 @@ import src.main.java.aura.utils.MathUtils;
 public class AnimateBackground extends Transition{
 
     public AnimateBackground(AuraBox<?> component, Color to, int ms){
-        Color initial = component.getBg();
+        Color initial = component.getBackgroundColor();
         initialize(component, to, ms, initial);
     }
 

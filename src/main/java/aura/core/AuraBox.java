@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.*;
-
 import src.main.java.aura.core.Transition.AnimationType;
 import src.main.java.aura.layouts.AuraColumn;
 import src.main.java.aura.layouts.AuraRow;
@@ -19,9 +18,15 @@ import src.main.java.aura.utils.MathUtils;
 
 @SuppressWarnings ("unchecked")
 public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
+    
+    protected AuraColumn.Alignment colAlign = null;
+    protected AuraRow.Alignment rowAlign = null;
+    
+    protected float anchorX = 0.5f;
+    protected float anchorY = 0.5f;
 
-    private AuraColumn.Alignment colAlign = null;
-    private AuraRow.Alignment rowAlign = null;
+    protected Image backgroundImage = null;
+    protected boolean scaleBackground = true;
 
     public T alignSelf(AuraColumn.Alignment align){
         this.colAlign = align;
@@ -41,17 +46,12 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         return this.colAlign;
     }
 
-    protected Image backgroundImage = null;
-    protected boolean scaleBackground = true;
-
     public T background(Image img){
         this.backgroundImage = img;
         repaint();
         return (T) this;
     }
 
-    private float anchorX = 0.5f;
-    private float anchorY = 0.5f;
 
     public T anchor(float x, float y){
         this.anchorX = x;
@@ -67,7 +67,7 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         return anchorY;
     }
 
-    private float weight = 0;
+    protected float weight = 0;
 
     public T weight(float w){
         this.weight = w;
@@ -82,7 +82,7 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
     protected final List<HoverAction<T>> hoverActions = new ArrayList<>();
     protected final List<ClickAction<T>> clickActions = new ArrayList<>();
 
-    protected  void addMouseEvents(){
+    protected void addMouseEvents(){
 
         AuraBox<T> self = this;
 
@@ -150,36 +150,36 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
     private float offsetY = 0;
 
     //rotacion
-    private float angle = 0;
+    protected  float angle = 0;
 
     //Para SGrid
-    private int colSpan = 1;
-    private int rowSpan = 1;
+    protected int colSpan = 1;
+    protected int rowSpan = 1;
 
     //scala
-    private float scale = 1.0f;
+    protected float scale = 1.0f;
 
     protected boolean isHovered = false;
 
     //shadow
-    private Color shadowColor = new Color(0, 0, 0, 100);
-    private float shadowSize = 0;
-    private float shadowOffsetX = 0;
-    private float shadowOffsetY = 0;
+    protected Color shadowColor = new Color(0, 0, 0, 100);
+    protected float shadowSize = 0;
+    protected float shadowOffsetX = 0;
+    protected float shadowOffsetY = 0;
 
     //Bordes
-    private Color StrokeColor = new Color(200, 200, 200);
-    private float strokeWidth = 0f;
-    private boolean[] paintedStrokes = new boolean[]{true, true, true, true};
+    protected Color StrokeColor = new Color(200, 200, 200);
+    protected float strokeWidth = 0f;
+    protected boolean[] paintedStrokes = new boolean[]{true, true, true, true};
 
     //Comportamiento con hijos
-    private boolean clipChildrens = false;
+    protected boolean clipChildrens = false;
 
     //Animaciones
-    private final List<Transition> timers = new ArrayList<>();
-    private final List<AnimationType> timersTypes = new ArrayList<>();
+    protected final List<Transition> timers = new ArrayList<>();
+    protected final List<AnimationType> timersTypes = new ArrayList<>();
 
-    private final Map<Component, Point> absoluteComponents = new HashMap<>();
+    protected final Map<Component, Point> absoluteComponents = new HashMap<>();
 
     public static enum Backgrounds {
 
@@ -207,8 +207,9 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         return this.colSpan;
     }
 
-    protected void setBgType(boolean ty){
+    public T setBgType(boolean ty){
         this.bgType = ty;
+        return (T) this;
     }
 
     public T rotate(float angle){
@@ -269,21 +270,14 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         return (T) this;
     }
 
-    public void setScale(float scale){
+    public T scale(float scale){
         this.scale = scale;
         repaint();
+        return (T) this;
     }
 
     public float getScale(){
         return this.scale;
-    }
-
-    protected AuraBox(){
-
-        setOpaque(false);
-        this.backgroundColors.add(new Color(255, 255, 255));
-        this.backgroundFractions.add(0.0f);
-
     }
 
     protected boolean checkClick(Point p){
@@ -344,33 +338,51 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         return (T) this;
     }
 
-    protected Insets getRadius(){
+    public Insets getRadius(){
         return new Insets((int) this.radios[0], (int) this.radios[1], (int) this.radios[2], (int) this.radios[3]);
     }
 
-    protected Insets getPadding(){
+    public Insets getPadding(){
         return new Insets((int) this.padding[0], (int) this.padding[1], (int) this.padding[2], (int) this.padding[3]);
     }
 
-    protected void setFlatCorners(boolean tl, boolean tr, boolean bl, boolean br){
-        this.flatCorners = new boolean[]{tl, tr, bl, br};
-        repaint();
+    public T flatCorners(boolean all){
+        return flatCorners(all, all, all, all);
     }
 
-    protected boolean[] getFlatCorners(){
+    public T flatCorners(boolean top, boolean bottom){
+        return flatCorners(top, top, bottom, bottom);
+    }
+
+    public T flatCorners(boolean tl, boolean tr, boolean bl, boolean br){
+        this.flatCorners = new boolean[]{tl, tr, bl, br};
+        repaint();
+        return (T) this;
+    }
+
+    public boolean[] getFlatCorners(){
         return this.flatCorners;
     }
 
-    protected void setPaintStrokes(boolean top, boolean left, boolean bottom, boolean right){
-        this.paintedStrokes = new boolean[]{top, left, bottom, right};
-        repaint();
+    public T paintStrokes(boolean all){
+        return paintStrokes(all, all, all, all);
     }
 
-    protected boolean[] getPaintStrokes(){
+    public T paintStrokes(boolean top_bottom, boolean left_right){
+        return paintStrokes(top_bottom, left_right, top_bottom, left_right);
+    }
+
+    public T paintStrokes(boolean top, boolean left, boolean bottom, boolean right){
+        this.paintedStrokes = new boolean[]{top, left, bottom, right};
+        repaint();
+        return (T) this;
+    }
+
+    public boolean[] getPaintStrokes(){
         return this.paintedStrokes;
     }
 
-    protected Insets getMargin(){
+    public Insets getMargin(){
         return new Insets((int) this.margin[0], (int) this.margin[1], (int) this.margin[2], (int) this.margin[3]);
     }
 
@@ -383,58 +395,71 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         return (T) this;
     }
 
-    protected void addBg(Color color, float position){
+    public T addBg(Color color, float position){
         this.backgroundColors.add(color);
         this.backgroundFractions.add(position);
         repaint();
+        return (T) this;
     }
 
-    public Color getBg(){
+    protected AuraBox(){
+        setOpaque(false);
+        this.backgroundColors.add(new Color(255, 255, 255));
+        this.backgroundFractions.add(0.0f);
+    }
+
+    public Color getBackgroundColor(){
         return this.backgroundColors.get(0);
     }
 
-    protected void setBackgroundColorAtIndex(Color color, int index){
-        if(index < 0 || index >= this.backgroundColors.size()) return;
+    public T backgroundColorAtIndex(Color color, int index){
+        if(index < 0 || index >= this.backgroundColors.size()) return (T) this;
         this.backgroundColors.set(index, color);
         repaint();
+        return (T) this;
     }
 
-    protected void setBackgroundFractionAtIndex(float fraction, int index){
-        if(index < 0 || index >= this.backgroundColors.size()) return;
+    public T backgroundFractionAtIndex(float fraction, int index){
+        if(index < 0 || index >= this.backgroundColors.size()) return (T) this;
         this.backgroundFractions.set(index, fraction);
         repaint();
+        return (T) this;
     }
 
-    protected void setBackgroundAtIndex(Color color, float fraction, int index){
-        if(index < 0 || index >= this.backgroundColors.size()) return;
+    public T backgroundAtIndex(Color color, float fraction, int index){
+        if(index < 0 || index >= this.backgroundColors.size()) return (T) this;
         this.backgroundFractions.set(index, fraction);
         this.backgroundColors.set(index, color);
         repaint();
+        return (T) this;
     }
 
-    public void setOpacity(float alpha){
-        if(alpha > 1f || alpha < 0f) return;
+    public T opacity(float alpha){
+        if(alpha > 1f || alpha < 0f) return (T) this;
         this.opacity = alpha;
         repaint();
+        return (T) this;
     }
 
     public float getOpacity(){
         return this.opacity;
     }
 
-    protected void setBackgroundAngle(float angle){
+    public T backgroundAngle(float angle){
         this.backgroundAngle = angle;
         repaint();
+        return (T) this;
     }
 
     public float getBackgroundAngle(){
         return this.backgroundAngle;
     }
 
-    protected void setBackgroundOffset(float offsetX, float offetY){
+    public T backgroundOffset(float offsetX, float offetY){
         this.backgroundOffsetX = offsetX;
         this.backgroundOffsetY = offsetY;
         repaint();
+        return (T) this;
     }
 
     public T shadow(Color color, float size){
@@ -444,13 +469,14 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         return (T) this;
     }
 
-    protected void setShadowOffset(float offsetX, float offsetY){
+    public T shadowOffset(float offsetX, float offsetY){
         this.shadowOffsetX = offsetX;
         this.shadowOffsetY = offsetY;
         repaint();
+        return (T) this;
     }
 
-    private void drawShadow(Graphics2D g2, Shape shape) {
+    protected void drawShadow(Graphics2D g2, Shape shape) {
         if (shadowSize <= 0) return;
 
         Graphics2D gShadow = (Graphics2D) g2.create();
@@ -482,7 +508,7 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         gShadow.dispose();
     }
 
-    private void drawStrokes(Graphics2D g2, Shape shape, float x, float y, float width, float height) {
+    protected void drawStrokes(Graphics2D g2, Shape shape, float x, float y, float width, float height) {
         if (strokeWidth <= 0) return;
 
         Graphics2D gStroke = (Graphics2D) g2.create();
@@ -733,7 +759,7 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
 
     }
 
-    public void animate(Transition transition, boolean cancel){
+    public T animate(Transition transition, boolean cancel){
 
         if(cancel){
             for(int i = 0; i < timers.size(); i ++){
@@ -747,9 +773,10 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
 
         this.timers.add(transition);
         this.timersTypes.add(transition.getAnimationType());
+        return (T) this;
     }
 
-    public void cancelAnimations(AnimationType type){
+    public T cancelAnimations(AnimationType type){
 
         for(int i = 0; i < timers.size(); i ++){
             if(type == null || timersTypes.get(i) == type){
@@ -758,6 +785,8 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
                 timersTypes.remove(i);
             }
         }
+
+        return (T) this;
         
     }
 

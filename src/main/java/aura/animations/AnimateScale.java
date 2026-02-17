@@ -11,7 +11,7 @@ public class AnimateScale extends Transition {
     }
 
     private void initialize(AuraBox<?> component,float initialScale, float to, int ms){
-        setup(initialScale, to, ms, value -> { component.setScale(value); } ,component, TransitionType.LINEAR);
+        setup(initialScale, to, ms, value -> { component.scale(value); } ,component, TransitionType.LINEAR);
 
         animationType(AnimationType.SCALE);
     }
