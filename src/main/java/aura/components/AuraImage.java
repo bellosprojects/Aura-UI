@@ -1,8 +1,7 @@
 package src.main.java.aura.components;
 
-import javax.swing.ImageIcon;
 import java.awt.Image;
-
+import javax.swing.ImageIcon;
 import src.main.java.aura.core.AuraBox;
 
 public class AuraImage extends AuraBox<AuraImage> {
@@ -22,6 +21,10 @@ public class AuraImage extends AuraBox<AuraImage> {
         setOpaque(false);
         this.size(100, 100);
         
+    }
+
+    public Image getImage(){
+        return this.backgroundImage;
     }
 
 }

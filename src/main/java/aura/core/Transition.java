@@ -64,7 +64,7 @@ public abstract class Transition {
         float min = Math.min(initial, target);
         float max = Math.max(initial, target);
 
-        timer = new Timer(this.delay, e -> { // ~60 FPS
+        timer = new Timer(15, e -> {
             long elapsed = System.currentTimeMillis() - startTime;
             float progress = (float) elapsed / duration;
 
@@ -171,13 +171,24 @@ public abstract class Transition {
 
     public void start() {
 
-        if(this.component != null) this.component.animate(this, this.cancel);
-        if(startAction != null) startAction.onStart();
+        new Thread(() -> {
+            try {
+                Thread.sleep(delay);
 
-        startTime = System.currentTimeMillis();
-        timer.start();
+                if(this.component != null) this.component.animate(this, this.cancel);
+                if(startAction != null) startAction.onStart();
 
-        if(this.parallelT != null) this.parallelT.start();
+                startTime = System.currentTimeMillis();
+                timer.start();
+
+                if(this.parallelT != null) this.parallelT.start();
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+        }).start();
+
     }
 
     public void stop(boolean critic) {

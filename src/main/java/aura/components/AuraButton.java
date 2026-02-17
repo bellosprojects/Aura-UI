@@ -1,11 +1,10 @@
 package src.main.java.aura.components;
 
+import java.awt.*;
 import javax.swing.JLabel;
-
 import src.main.java.aura.animations.AnimateBackground;
 import src.main.java.aura.animations.AnimateRipple;
 import src.main.java.aura.core.AuraBox;
-import java.awt.*;
 
 public class AuraButton extends AuraBox<AuraButton> {
 
@@ -14,6 +13,7 @@ public class AuraButton extends AuraBox<AuraButton> {
     public AuraButton(String text){
         label = new JLabel(text);
         label.setOpaque(false);
+        label.setForeground(Color.black);
         radius(10, 10, 10, 10);
         setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
         addMouseEvents();

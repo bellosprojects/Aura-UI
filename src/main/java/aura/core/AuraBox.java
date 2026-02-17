@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.*;
+import src.main.java.aura.components.AuraImage;
 import src.main.java.aura.core.Transition.AnimationType;
 import src.main.java.aura.layouts.AuraColumn;
 import src.main.java.aura.layouts.AuraRow;
@@ -52,6 +53,10 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         return (T) this;
     }
 
+    public T background(AuraImage img){
+        background(img.getImage());
+        return (T) this;
+    }
 
     public T anchor(float x, float y){
         this.anchorX = x;
@@ -221,34 +226,6 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
 
     public float getRotation(){
         return this.angle;
-    }
-
-    public void addAt(Component comp, int x, int y) {
-        absoluteComponents.put(comp, new Point(x, y));
-        super.add(comp); 
-        revalidate();
-        repaint();
-    }
-
-    @Override
-    public void doLayout(){
-
-        super.doLayout();
-
-        for (Map.Entry<Component, Point> entry : absoluteComponents.entrySet()) {
-            Component comp = entry.getKey();
-            Point pos = entry.getValue();
-
-            Insets insets = getInsets();
-            
-            comp.setBounds(
-                insets.left + pos.x, 
-                insets.top + pos.y, 
-                comp.getPreferredSize().width, 
-                comp.getPreferredSize().height
-            );
-        }
-
     }
 
     @Override
@@ -731,7 +708,7 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
 
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
         g2.translate(offsetX, offsetY);
 
         if(angle != 0.0f){
@@ -819,5 +796,48 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         this.setMinimumSize(new Dimension(w, h));
         this.setMaximumSize(new Dimension(w, h));
         return (T) this;
+    }
+
+    public T width(int width){
+        return size(width, getHeight());
+    }
+
+    public T height(int height){
+        return size(getWidth(), height);
+    }
+
+    private float widthPorc = -1;
+    private float heightPorc = -1;
+
+    public T widthPorc(float porc){
+        this.widthPorc = porc;
+        if (getParent() != null) getParent().revalidate();
+        return (T) this;
+    }
+
+    public T heightPorc(float porc){
+        this.heightPorc = porc;
+        if (getParent() != null) getParent().revalidate();
+        return (T) this;
+    }
+
+    public T fillParent(){
+        return widthPorc(1).heightPorc(1);
+    }
+
+    public T fillWidth(){
+        return widthPorc(1);
+    }
+
+    public T fillHeight(){
+        return heightPorc(1);
+    }
+
+    public float getWidthPorc(){
+        return this.widthPorc;
+    }
+
+    public float getHeightPorc(){
+        return this.heightPorc;
     }
 }

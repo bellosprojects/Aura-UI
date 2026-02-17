@@ -1,8 +1,8 @@
 package src.main.java.aura.layouts;
 
 import java.awt.*;
-import src.main.java.aura.core.Layout;
 import src.main.java.aura.core.AuraBox;
+import src.main.java.aura.core.Layout;
 
 public class AuraRow extends Layout<AuraRow> {
 
@@ -62,15 +62,17 @@ public class AuraRow extends Layout<AuraRow> {
                 finalWidth = (int) ((box.getWeight() / totalWeight) * remainingWidth);
             }
 
+            int finalHeight = (box.getHeightPorc() > 0)? (int) (box.getHeightPorc() * availableHeight) : box.getHeight();
+
             Alignment finalAlign = (box.getAlignR() != null)? box.getAlignR() : alignment;
 
             int y = switch (finalAlign) {
-                case CENTER -> in.top + (availableHeight - d.height) / 2;
-                case BOTTOM -> in.top + (availableHeight - d.height);
+                case CENTER -> in.top + (availableHeight - finalHeight) / 2;
+                case BOTTOM -> in.top + (availableHeight - finalHeight);
                 default -> in.top;
             };
 
-            c.setBounds(currentX, y, finalWidth, d.height);
+            c.setBounds(currentX, y, finalWidth, finalHeight);
             currentX += finalWidth + gap;
         }
     }

@@ -1,8 +1,8 @@
 package src.main.java.aura.layouts;
 
 import java.awt.*;
-import src.main.java.aura.core.Layout;
 import src.main.java.aura.core.AuraBox;
+import src.main.java.aura.core.Layout;
 
 public class AuraColumn extends Layout<AuraColumn> {
 
@@ -64,13 +64,16 @@ public class AuraColumn extends Layout<AuraColumn> {
 
             Alignment finalAlign = (box.getAlignC() != null)? box.getAlignC() : alignment;
 
+            int finalWidth = (box.getWidthPorc() > 0)? (int) (box.getWidthPorc() * availableWidth) : d.width;
+
             int x = switch (finalAlign) {
-                case CENTER -> in.left + (availableWidth - d.width) / 2;
-                case RIGHT -> in.left + (availableWidth - d.width);
+                case CENTER -> in.left + (availableWidth - finalWidth) / 2;
+                case RIGHT -> in.left + (availableWidth - finalWidth);
                 default -> in.left;
             };
 
-            c.setBounds(x, currentY, d.width, finalHeight);
+
+            c.setBounds(x, currentY, finalWidth, finalHeight);
             currentY += finalHeight + gap;
         }
     }
