@@ -4,7 +4,7 @@
 Aura es un motor de interfaz de usuario ligero construido sobre Java 2D (AWT/Swing) que elimina la rigidez de los layouts tradicionales de Java, permitiendo crear interfaces fluidas, con sombras dinámicas, transformaciones espaciales y un sistema de animaciones basado en easing.
 
 ## ✨ Características Principales
-- Declarative Layout System: Olvida el GridBagLayout. Aura usa SRow, SColumn y SGrid con soporte nativo para Weights (proporciones) y Spans (celdas múltiples).
+- Declarative Layout System: Olvida el GridBagLayout. Aura usa AuraRow, AuraColumn y AuraGrid con soporte nativo para Weights (proporciones) y Spans (celdas múltiples).
 
 - Advanced Rendering:  Sombras reales con desenfoque simulado.
 
@@ -23,7 +23,7 @@ A diferencia de los componentes estándar de Swing que recortan la pintura en su
 2. Layouts Inteligentes
 SGrid: Implementa una matriz de ocupación booleana para calcular automáticamente la posición de elementos con colSpan y rowSpan.
 
-3. Flex-Weights: SRow y SColumn calculan el espacio disponible en tiempo de ejecución para repartir dimensiones basadas en pesos, similar a Flexbox o Jetpack Compose.
+3. Flex-Weights: AuraRow y AuraColumn calculan el espacio disponible en tiempo de ejecución para repartir dimensiones basadas en pesos, similar a Flexbox o Jetpack Compose.
 
 ## 🚀 Ejemplo de Uso
 Crear una barra de búsqueda moderna con un campo flexible es tan sencillo como esto:
