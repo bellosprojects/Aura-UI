@@ -3,7 +3,7 @@ package aura.animations;
 import aura.core.Transition;
 import aura.core.TransitionIntStep;
 
-public class AnimateInteger extends Transition {
+public class AnimateInteger extends Transition <AnimateInteger>{
 
     public AnimateInteger(int initial, int end, int ms, TransitionIntStep step){
 

@@ -3,7 +3,7 @@ package aura.animations;
 import aura.core.AuraBox;
 import aura.core.Transition;
 
-public class AnimateShake extends Transition {
+public class AnimateShake extends Transition<AnimateShake> {
 
     public AnimateShake(AuraBox<?> component, int intensity, int ms){
 

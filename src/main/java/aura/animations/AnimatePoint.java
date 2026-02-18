@@ -1,10 +1,11 @@
 package aura.animations;
 
 import java.awt.Point;
+
 import aura.core.Transition;
 import aura.core.TransitionPointStep;
 
-public class AnimatePoint extends Transition {
+public class AnimatePoint extends Transition<AnimatePoint> {
 
     public AnimatePoint(Point initial, Point end, int ms, TransitionPointStep step) {
 

@@ -3,7 +3,7 @@ package aura.animations;
 import aura.core.Transition;
 import aura.core.AuraBox;
 
-public class AnimateWobble extends Transition {
+public class AnimateWobble extends Transition<AnimateWobble> {
 
     public AnimateWobble(AuraBox<?> component, int intensity, int ms){
         initialize(component, component.getAnchorX(), component.getAnchorY(), intensity, ms);
@@ -15,17 +15,17 @@ public class AnimateWobble extends Transition {
 
         component.anchor(1f, 1f);
 
-        Transition t1 = new AnimateRotation(component, intensity / 2, ms / 2).then(() ->
+        AnimateRotation t1 = new AnimateRotation(component, intensity / 2, ms / 2).then(() ->
             component.anchor(0f, 1f)
         ).pingPong();
 
-        Transition t2 = new AnimateRotation(component, -intensity / 3, ms / 3).then(() -> {
+        AnimateRotation t2 = new AnimateRotation(component, -intensity / 3, ms / 3).then(() -> {
             component.anchor(1f, 1f);
         }).pingPong();
 
         t1.serie(t2);
 
-        Transition t3 = new AnimateRotation(component, intensity / 4, ms / 4).then(() -> {
+        AnimateRotation t3 = new AnimateRotation(component, intensity / 4, ms / 4).then(() -> {
             component.anchor(initialX, initialY);
         }).pingPong();
 

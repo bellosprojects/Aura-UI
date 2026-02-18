@@ -3,7 +3,7 @@ package aura.animations;
 import aura.core.AuraBox;
 import aura.core.Transition;
 
-public class AnimateRipple extends Transition {
+public class AnimateRipple extends Transition<AnimateRipple> {
     
     public AnimateRipple(AuraBox<?> component, float to, int ms){
 

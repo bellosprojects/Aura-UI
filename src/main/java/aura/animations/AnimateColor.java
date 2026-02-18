@@ -1,11 +1,12 @@
 package aura.animations;
 
 import java.awt.Color;
+
 import aura.core.Transition;
 import aura.core.TransitionColorStep;
 import aura.utils.MathUtils;
 
-public class AnimateColor extends Transition {
+public class AnimateColor extends Transition<AnimateColor> {
 
     public AnimateColor(Color initial, Color end, int ms, TransitionColorStep step) {
 

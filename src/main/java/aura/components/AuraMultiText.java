@@ -1,7 +1,11 @@
 package aura.components;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+
 import javax.swing.JTextArea;
+
 import aura.core.AuraBox;
 
 public class AuraMultiText extends AuraBox<AuraMultiText> {
@@ -19,8 +23,27 @@ public class AuraMultiText extends AuraBox<AuraMultiText> {
         this.padding(10).add(textArea, BorderLayout.CENTER);
     }
 
-    public AuraMultiText text(String t){
-        textArea.setText(t);
+    public AuraMultiText text(String text){
+        this.textArea.setText(text);
+        repaint();
+        if(this.getParent() != null) this.getParent().revalidate();
+        return this;
+    }
+
+    public String getText(){
+        return textArea.getText();
+    }
+
+    public AuraMultiText font(Font font){
+        this.textArea.setFont(font);
+        repaint();
+        if(getParent() != null) getParent().revalidate();
+        return this;
+    }
+
+    public AuraMultiText textColor(Color color){
+        this.textArea.setForeground(color);
+        repaint();
         return this;
     }
 
@@ -35,10 +58,15 @@ public class AuraMultiText extends AuraBox<AuraMultiText> {
         return this;
     }
 
-    public void setText(String text){
-        this.textArea.setText(text);
-        repaint();
-        if(this.getParent() != null) this.getParent().revalidate();
+    @Override
+    public Font getFont(){
+        if(this.textArea == null) return super.getFont();
+        return this.textArea.getFont();
     }
+
+    public Color getTextColor(){
+        return this.textArea.getForeground();
+    }
+
 
 }

@@ -3,7 +3,7 @@ package aura.animations;
 import aura.core.AuraBox;
 import aura.core.Transition;
 
-public class AnimateOpacity extends Transition {
+public class AnimateOpacity extends Transition<AnimateOpacity> {
     
     public AnimateOpacity(AuraBox<?> component, float to, int ms){
 

@@ -1,7 +1,11 @@
 package aura.components;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
+
 import javax.swing.JLabel;
+
 import aura.core.AuraBox;
 
 public class AuraText extends AuraBox<AuraText> {
@@ -45,6 +49,10 @@ public class AuraText extends AuraBox<AuraText> {
     public Font getFont(){
         if(this.label == null) return super.getFont();
         return this.label.getFont();
+    }
+
+    public Color getTextColor(){
+        return this.label.getForeground();
     }
 
 }

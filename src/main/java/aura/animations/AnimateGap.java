@@ -3,7 +3,7 @@ package aura.animations;
 import aura.core.Layout;
 import aura.core.Transition;
 
-public class AnimateGap extends Transition {
+public class AnimateGap extends Transition<AnimateGap> {
 
     public AnimateGap(Layout<?> layout, int to, int ms){
         initialize(layout, layout.getGap(), to, ms);

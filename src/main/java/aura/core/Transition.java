@@ -1,9 +1,11 @@
 package aura.core;
 
 import javax.swing.Timer;
+
 import aura.utils.MathUtils;
 
-public abstract class Transition {
+@SuppressWarnings ("unchecked")
+public abstract class Transition<T extends  Transition<T>> {
 
     private Timer timer;
     private long startTime;
@@ -15,8 +17,8 @@ public abstract class Transition {
     private int delay = 0;
     private boolean forward = true;
     private boolean pingPong = false;
-    private Transition serieT;
-    private Transition parallelT;
+    private Transition<?> serieT;
+    private Transition<?> parallelT;
     private AuraBox<?> component;
     private boolean cancel = false;
     private TransitionFloatStep step;
@@ -102,54 +104,54 @@ public abstract class Transition {
         });
     }
 
-    public Transition delay(int ms){
+    public T delay(int ms){
         this.delay = ms;
-        return this;
+        return (T) this;
     }
 
-    public Transition pingPong(){
+    public T pingPong(){
         this.pingPong = true;
-        return this;
+        return (T) this;
     }
 
-    public Transition loop(){
+    public T loop(){
         this.repeat = true;
-        return this;
+        return (T) this;
     }
 
-    public Transition animationType(AnimationType type){
+    public T animationType(AnimationType type){
         this.animationType = type;
-        return this;
+        return (T) this;
     }
 
-    public Transition type(TransitionType type){
+    public T type(TransitionType type){
         this.type = type;
-        return this;
+        return (T) this;
     }
 
-    public Transition then(FinishAction action){
+    public T then(FinishAction action){
         this.finishAction = action;
-        return this;
+        return (T) this;
     }
 
-    public Transition when(StartAction action){
+    public T when(StartAction action){
         this.startAction = action;
-        return this;
+        return (T) this;
     }
 
-    public Transition serie(Transition animation){
+    public T serie(Transition<?> animation){
         this.serieT = animation;
-        return this;
+        return (T) this;
     }
 
-    public Transition parallel(Transition animation){
+    public T parallel(Transition<?> animation){
         this.parallelT = animation;
-        return this;
+        return (T) this;
     }
 
-    public Transition cancelPrev(boolean cancel){
+    public T cancelPrev(boolean cancel){
         this.cancel = cancel;
-        return this;
+        return (T)this;
     }
 
     private float calc(float value) {

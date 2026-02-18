@@ -3,7 +3,7 @@ package aura.animations;
 import aura.core.AuraBox;
 import aura.core.Transition;
 
-public class AnimateScale extends Transition {
+public class AnimateScale extends Transition<AnimateScale> {
     
     public AnimateScale(AuraBox<?> component, float to, int ms){
         

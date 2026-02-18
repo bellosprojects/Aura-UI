@@ -5,9 +5,12 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Image;
 import java.util.function.Consumer;
+
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
+
 import aura.animations.AnimateOpacity;
+import aura.core.AuraBox;
 
 public class AuraWindow extends JFrame {
 
@@ -117,5 +120,10 @@ public class AuraWindow extends JFrame {
             })
             .start();
     }
-    
+
+    public AuraBox<?> find(String id){
+
+        return main.find(id);
+
+    }
 }

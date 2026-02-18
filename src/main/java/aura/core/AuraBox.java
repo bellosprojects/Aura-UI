@@ -1,7 +1,22 @@
 package aura.core;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.LinearGradientPaint;
+import java.awt.Paint;
+import java.awt.Point;
+import java.awt.RadialGradientPaint;
+import java.awt.Shape;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
@@ -9,8 +24,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.*;
+
+import javax.swing.BorderFactory;
+import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
+import aura.animations.AnimateOpacity;
 import aura.components.AuraImage;
+import aura.components.AuraWindow;
 import aura.core.Transition.AnimationType;
 import aura.layouts.AuraColumn;
 import aura.layouts.AuraRow;
@@ -190,7 +212,7 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
     protected boolean clipChildrens = false;
 
     //Animaciones
-    protected final List<Transition> timers = new ArrayList<>();
+    protected final List<Transition<?>> timers = new ArrayList<>();
     protected final List<AnimationType> timersTypes = new ArrayList<>();
 
     protected final Map<Component, Point> absoluteComponents = new HashMap<>();
@@ -474,23 +496,12 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         BoxUtils.setHighQuality(gShadow);
         gShadow.translate(shadowOffsetX, shadowOffsetY);
 
-        double centerX = getWidth() / 2.0;
-        double centerY = getHeight() / 2.0;
-        gShadow.translate(centerX, centerY);
-        gShadow.scale((shadowSize / getWidth()) + 1, (shadowSize / getHeight()) + 1);
-        gShadow.translate(-centerX, -centerY);
-
-        gShadow.setClip(shape);
-
         float change = shadowColor.getAlpha() / (shadowSize);
 
-        // Dibujamos capas sucesivas para crear el efecto de suavizado (Blur)
         for (float i = shadowSize; i >= 1; i--) {
-            // La opacidad disminuye conforme nos alejamos del centro
-            float opacity_ = (float) (change * (i + 1));
+            float opacity_ = (float) (change * (shadowSize - i + 1));
             gShadow.setPaint(new Color(shadowColor.getRed(), shadowColor.getGreen(), shadowColor.getBlue(), (int) MathUtils.clamp(opacity_, 0, 255)));
             
-            // El grosor del trazo simula el desenfoque
             gShadow.setStroke(new BasicStroke(i));
             gShadow.draw(shape);
         }
@@ -509,10 +520,8 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         float cX = x + (width) / 2f;
         float cY = y + (height) / 2f;
 
-        // El área de recorte sigue siendo la silueta original (shape)
         Area clipArea = new Area(new Rectangle2D.Float(x, y, width + 1f, height + 1f));
 
-        // Restamos los cuadrantes que NO queremos ver
         if (!this.paintedStrokes[0]) clipArea.subtract(new Area(BoxUtils.createTriangle(x, y, x+width, y, cX, cY))); // Top
         if (!this.paintedStrokes[1]) clipArea.subtract(new Area(BoxUtils.createTriangle(x, y, x, y+height, cX, cY))); // Bottom
         if (!this.paintedStrokes[2]) clipArea.subtract(new Area(BoxUtils.createTriangle(x, y + height + 1, x + width + 1, y+height + 1, cX, cY))); // Left
@@ -521,7 +530,6 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         gStroke.setClip(clipArea);
         gStroke.setStroke(new BasicStroke(strokeWidth));
         
-        // Dibujamos el shape original
         gStroke.draw(shape);
 
         gStroke.dispose();
@@ -615,10 +623,8 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
             float cos = (float) Math.cos(angleRad);
             float sin = (float) Math.sin(angleRad);
             
-            // 1. Calcular la longitud necesaria para que el gradiente cubra el área
             float length = Math.abs(width * cos) + Math.abs(height * sin);
             
-            // 2. Centrar el degradado en el medio del componente
             float centerX = x + width / 2f;
             float centerY = y + height / 2f;
             
@@ -691,9 +697,7 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
 
     @Override
     public Insets getInsets() {
-        // Obtenemos los insets del margen (el borde)
         Insets borderInsets = super.getInsets();
-        // Le sumamos el padding para que los componentes hijos se desplacen más
         return new Insets(
             borderInsets.top + padding[0],
             borderInsets.left + padding[1],
@@ -753,7 +757,7 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
 
     }
 
-    public T animate(Transition transition, boolean cancel){
+    public T animate(Transition<?> transition, boolean cancel){
 
         if(cancel){
             for(int i = 0; i < timers.size(); i ++){
@@ -861,5 +865,79 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
 
     public float getHeightPorc(){
         return this.heightPorc;
+    }
+
+    private String id;
+
+    public T id(String id){
+        this.id = id;
+        return (T) this;
+    }
+
+    public String getId(){
+        return this.id;
+    }
+
+    public AuraBox<?> find(String id) {
+
+        if (id.equals(this.id)) {
+            return (AuraBox<?>) this;
+        }
+
+        for (Component child : getComponents()) {
+            if (child instanceof AuraBox) {
+                AuraBox<?> found = ((AuraBox<?>) child).find(id);
+                if (found != null) return found;
+            }
+        }
+
+        return null;
+    }
+
+    private AuraBox<?> info;
+
+    public T info(AuraBox<?> boxInfo){
+        return info(boxInfo, 0, 0);
+    }
+
+    public T info(AuraBox<?> boxInfo, float sx, float sy){
+        this.info = boxInfo;
+
+        AnimateOpacity fadeOut = new AnimateOpacity(boxInfo, 0f, 300).then(() -> boxInfo.setVisible(false));
+        boxInfo.opacity(0f);
+        boxInfo.setVisible(false);
+
+        SwingUtilities.invokeLater(() -> {
+
+            AuraWindow window = (AuraWindow) SwingUtilities.getWindowAncestor(this);
+
+            Point location = SwingUtilities.convertPoint(this, (int)(getWidth() * sx), (int)(getHeight() * sy), window.getLayeredPane());
+
+            boxInfo.setBounds(location.x, location.y - boxInfo.getPreferredSize().height - 5, boxInfo.getPreferredSize().width, boxInfo.getPreferredSize().height);
+
+            window.getLayeredPane().add(boxInfo, JLayeredPane.POPUP_LAYER);
+        });
+
+        AnimateOpacity fadeIn = new AnimateOpacity(boxInfo, 1f, 300);
+        
+
+        onHover((self, hover) -> {
+            
+            if(hover){
+
+                boxInfo.setVisible(true);
+                fadeIn.start();
+
+            } else {
+                fadeOut.start();
+            }
+
+        });
+
+        return (T) this;
+    }
+
+    public AuraBox<?> getInfo(){
+        return this.info;
     }
 }

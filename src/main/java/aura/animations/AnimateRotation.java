@@ -3,7 +3,7 @@ package aura.animations;
 import aura.core.Transition;
 import aura.core.AuraBox;
 
-public class AnimateRotation extends Transition {
+public class AnimateRotation extends Transition<AnimateRotation> {
 
     private final AuraBox<?> component;
     private int ms = 0;

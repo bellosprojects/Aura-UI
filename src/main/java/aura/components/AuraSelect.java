@@ -1,10 +1,14 @@
 package aura.components;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Point;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.swing.JLayeredPane;
 import javax.swing.SwingUtilities;
+
 import aura.animations.AnimateInteger;
 import aura.layouts.AuraColumn;
 
@@ -20,7 +24,6 @@ public class AuraSelect extends AuraText {
         this.options = Arrays.asList(options);
         
         this.radius(10).padding(10, 15).background(Color.white);
-        this.widthPorc(1f);
 
         this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         onClick(self -> togglePopup());

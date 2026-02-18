@@ -5,7 +5,7 @@ import aura.core.AuraBox;
 import aura.core.Transition;
 import aura.utils.MathUtils;
 
-public class AnimateShadow extends Transition {
+public class AnimateShadow extends Transition<AnimateShadow> {
     
     public AnimateShadow(AuraBox<?> component, Color toColor, int toSize, int ms){
 
