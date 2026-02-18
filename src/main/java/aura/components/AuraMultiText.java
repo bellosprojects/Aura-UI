@@ -1,8 +1,8 @@
-package src.main.java.aura.components;
+package aura.components;
 
 import java.awt.*;
 import javax.swing.JTextArea;
-import src.main.java.aura.core.AuraBox;
+import aura.core.AuraBox;
 
 public class AuraMultiText extends AuraBox<AuraMultiText> {
 

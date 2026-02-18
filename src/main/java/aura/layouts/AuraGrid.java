@@ -1,8 +1,8 @@
-package src.main.java.aura.layouts;
+package aura.layouts;
 
 import java.awt.*;
-import src.main.java.aura.core.AuraBox;
-import src.main.java.aura.core.Layout;
+import aura.core.AuraBox;
+import aura.core.Layout;
 
 public class AuraGrid extends Layout<AuraGrid> {
     

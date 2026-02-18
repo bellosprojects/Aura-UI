@@ -1,4 +1,4 @@
-package src.main.java.aura.utils;
+package aura.utils;
 
 public class MathUtils {
     

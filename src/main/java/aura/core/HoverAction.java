@@ -1,4 +1,4 @@
-package src.main.java.aura.core;
+package aura.core;
 
 public interface HoverAction <T> {
     void onHover(T self, boolean isHovered);

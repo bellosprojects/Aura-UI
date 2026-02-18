@@ -1,7 +1,7 @@
-package src.main.java.aura.animations;
+package aura.animations;
 
-import src.main.java.aura.core.Transition;
-import src.main.java.aura.core.TransitionFloatStep;
+import aura.core.Transition;
+import aura.core.TransitionFloatStep;
 
 public class AnimateFloat extends Transition {
 

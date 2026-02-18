@@ -1,8 +1,8 @@
-package src.main.java.aura.animations;
+package aura.animations;
 
 import java.awt.Point;
-import src.main.java.aura.core.Transition;
-import src.main.java.aura.core.TransitionPointStep;
+import aura.core.Transition;
+import aura.core.TransitionPointStep;
 
 public class AnimatePoint extends Transition {
 

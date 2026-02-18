@@ -1,4 +1,4 @@
-package src.main.java.aura.components;
+package aura.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -7,7 +7,7 @@ import java.awt.Image;
 import java.util.function.Consumer;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
-import src.main.java.aura.animations.AnimateOpacity;
+import aura.animations.AnimateOpacity;
 
 public class AuraWindow extends JFrame {
 

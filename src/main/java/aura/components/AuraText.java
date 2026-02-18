@@ -1,8 +1,8 @@
-package src.main.java.aura.components;
+package aura.components;
 
 import java.awt.*;
 import javax.swing.JLabel;
-import src.main.java.aura.core.AuraBox;
+import aura.core.AuraBox;
 
 public class AuraText extends AuraBox<AuraText> {
 

@@ -1,9 +1,9 @@
-package src.main.java.aura.animations;
+package aura.animations;
 
 import java.awt.Color;
-import src.main.java.aura.core.Transition;
-import src.main.java.aura.core.TransitionColorStep;
-import src.main.java.aura.utils.MathUtils;
+import aura.core.Transition;
+import aura.core.TransitionColorStep;
+import aura.utils.MathUtils;
 
 public class AnimateColor extends Transition {
 

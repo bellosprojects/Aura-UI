@@ -1,9 +1,9 @@
-package src.main.java.aura.components;
+package aura.components;
 
 import java.awt.*;
 import java.util.Map;
 import java.util.function.Consumer;
-import src.main.java.aura.core.AuraBox;
+import aura.core.AuraBox;
 
 public class AuraContainer extends AuraBox<AuraContainer> {
 

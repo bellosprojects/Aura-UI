@@ -1,4 +1,4 @@
-package src.main.java.aura.core;
+package aura.core;
 
 @FunctionalInterface
 public interface TransitionFloatStep {

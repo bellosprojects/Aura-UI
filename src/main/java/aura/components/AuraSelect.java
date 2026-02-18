@@ -1,12 +1,12 @@
-package src.main.java.aura.components;
+package aura.components;
 
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.JLayeredPane;
 import javax.swing.SwingUtilities;
-import src.main.java.aura.animations.AnimateInteger;
-import src.main.java.aura.layouts.AuraColumn;
+import aura.animations.AnimateInteger;
+import aura.layouts.AuraColumn;
 
 public class AuraSelect extends AuraText {
 

@@ -1,7 +1,7 @@
-package src.main.java.aura.components;
+package aura.components;
 
 import java.awt.*;
-import src.main.java.aura.animations.AnimateOpacity;
+import aura.animations.AnimateOpacity;
 
 public class AuraToast extends AuraText {
 

@@ -1,10 +1,10 @@
-package src.main.java.aura.components;
+package aura.components;
 
 import java.awt.*;
 import javax.swing.JLabel;
-import src.main.java.aura.animations.AnimateBackground;
-import src.main.java.aura.animations.AnimateRipple;
-import src.main.java.aura.core.AuraBox;
+import aura.animations.AnimateBackground;
+import aura.animations.AnimateRipple;
+import aura.core.AuraBox;
 
 public class AuraButton extends AuraBox<AuraButton> {
 

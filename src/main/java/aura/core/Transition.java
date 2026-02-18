@@ -1,7 +1,7 @@
-package src.main.java.aura.core;
+package aura.core;
 
 import javax.swing.Timer;
-import src.main.java.aura.utils.MathUtils;
+import aura.utils.MathUtils;
 
 public abstract class Transition {
 

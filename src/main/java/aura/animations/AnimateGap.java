@@ -1,7 +1,7 @@
-package src.main.java.aura.animations;
+package aura.animations;
 
-import src.main.java.aura.core.Layout;
-import src.main.java.aura.core.Transition;
+import aura.core.Layout;
+import aura.core.Transition;
 
 public class AnimateGap extends Transition {
 

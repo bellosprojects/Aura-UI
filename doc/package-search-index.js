@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"aura"},{"l":"aura.animations"},{"l":"aura.components"},{"l":"aura.core"},{"l":"aura.layouts"},{"l":"aura.utils"}];updateSearchResults();

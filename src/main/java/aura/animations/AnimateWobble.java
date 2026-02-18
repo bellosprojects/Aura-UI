@@ -1,7 +1,7 @@
-package src.main.java.aura.animations;
+package aura.animations;
 
-import src.main.java.aura.core.Transition;
-import src.main.java.aura.core.AuraBox;
+import aura.core.Transition;
+import aura.core.AuraBox;
 
 public class AnimateWobble extends Transition {
 

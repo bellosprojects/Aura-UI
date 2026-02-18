@@ -1,7 +1,10 @@
+package aura;
+
 import java.awt.Color;
 import java.awt.Font;
-import src.main.java.aura.components.AuraSelect;
-import src.main.java.aura.components.AuraWindow;
+
+import aura.components.AuraSelect;
+import aura.components.AuraWindow;
 
 public class Main {
 

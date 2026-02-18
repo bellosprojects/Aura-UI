@@ -1,4 +1,4 @@
-package src.main.java.aura.core;
+package aura.core;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -10,13 +10,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.*;
-import src.main.java.aura.components.AuraImage;
-import src.main.java.aura.core.Transition.AnimationType;
-import src.main.java.aura.layouts.AuraColumn;
-import src.main.java.aura.layouts.AuraRow;
-import src.main.java.aura.utils.BoxUtils;
-import src.main.java.aura.utils.MathUtils;
+import aura.components.AuraImage;
+import aura.core.Transition.AnimationType;
+import aura.layouts.AuraColumn;
+import aura.layouts.AuraRow;
+import aura.utils.BoxUtils;
+import aura.utils.MathUtils;
 
+/**
+ * AuraBox es la clase central de Aura
+ * proporciona carateristicas de renderizado avanzadas
+ * @author bellosprojects
+ * @version 1.0
+ */
 @SuppressWarnings ("unchecked")
 public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
     

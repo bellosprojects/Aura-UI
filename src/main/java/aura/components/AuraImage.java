@@ -1,8 +1,8 @@
-package src.main.java.aura.components;
+package aura.components;
 
 import java.awt.Image;
 import javax.swing.ImageIcon;
-import src.main.java.aura.core.AuraBox;
+import aura.core.AuraBox;
 
 public class AuraImage extends AuraBox<AuraImage> {
     
