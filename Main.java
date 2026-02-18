@@ -5,12 +5,10 @@ import src.main.java.aura.components.AuraWindow;
 
 public class Main {
 
-
-
     public static void main(String[] args) {
         
         new AuraWindow("Aura UI")
-            .size(200, 500)
+            .size(700, 500)
             .noResizable()
             .background(new Color(5, 15, 23))
             .display()

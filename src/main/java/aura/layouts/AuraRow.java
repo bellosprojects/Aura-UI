@@ -62,7 +62,7 @@ public class AuraRow extends Layout<AuraRow> {
                 finalWidth = (int) ((box.getWeight() / totalWeight) * remainingWidth);
             }
 
-            int finalHeight = (box.getHeightPorc() > 0)? (int) (box.getHeightPorc() * availableHeight) : box.getHeight();
+            int finalHeight = (box.getHeightPorc() > 0)? (int) (box.getHeightPorc() * availableHeight) : d.height;
 
             Alignment finalAlign = (box.getAlignR() != null)? box.getAlignR() : alignment;
 
