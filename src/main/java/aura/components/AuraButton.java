@@ -1,7 +1,12 @@
 package aura.components;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
+
 import javax.swing.JLabel;
+
 import aura.animations.AnimateBackground;
 import aura.animations.AnimateRipple;
 import aura.core.AuraBox;
@@ -15,9 +20,9 @@ public class AuraButton extends AuraBox<AuraButton> {
         label.setOpaque(false);
         label.setForeground(Color.black);
         radius(10, 10, 10, 10);
-        setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        setLayout(new BorderLayout());
         addMouseEvents();
-        add(label);
+        add(label, BorderLayout.CENTER);
 
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         padding(10, 20);

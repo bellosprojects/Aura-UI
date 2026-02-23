@@ -11,6 +11,7 @@ import javax.swing.SwingUtilities;
 
 import aura.animations.AnimateInteger;
 import aura.layouts.AuraColumn;
+import aura.utils.BoxUtils;
 
 public class AuraSelect extends AuraText {
 
@@ -33,7 +34,7 @@ public class AuraSelect extends AuraText {
 
     private void togglePopup() {
 
-        AuraWindow window = (AuraWindow) SwingUtilities.getWindowAncestor(this);
+        AuraWindow window = BoxUtils.getAuraWindow(this);
         
         Point location = SwingUtilities.convertPoint(this, 0, getHeight(), window.getLayeredPane());
 

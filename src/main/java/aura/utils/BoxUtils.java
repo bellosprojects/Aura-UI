@@ -1,7 +1,14 @@
 package aura.utils;
 
-import java.awt.*;
-import java.awt.geom.*;
+import java.awt.Component;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Window;
+import java.awt.geom.Path2D;
+
+import javax.swing.SwingUtilities;
+
+import aura.components.AuraWindow;
 
 public class BoxUtils {
     
@@ -19,6 +26,23 @@ public class BoxUtils {
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
         g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+    }
+
+    public static AuraWindow getAuraWindow(Component c) {
+        if (c == null) return null;
+    
+        Window window = SwingUtilities.getWindowAncestor(c);
+
+        if (window instanceof AuraWindow) return (AuraWindow) window;
+
+        Component parent = c.getParent();
+        while (parent != null) {
+            if (parent instanceof AuraWindow) return (AuraWindow) parent;
+            parent = parent.getParent();
+        }
+        
+        return null;
     }
 
 }

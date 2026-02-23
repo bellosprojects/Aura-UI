@@ -1,39 +1,40 @@
 package aura.animations;
 
-import aura.core.Transition;
 import aura.core.AuraBox;
+import aura.core.Transition;
 
 public class AnimateWobble extends Transition<AnimateWobble> {
 
-    public AnimateWobble(AuraBox<?> component, int intensity, int ms){
-        initialize(component, component.getAnchorX(), component.getAnchorY(), intensity, ms);
+    public AnimateWobble(AuraBox<?> component, int max, int repeats, int ms){
+        initialize(component, component.getAnchorX(), component.getAnchorY(), max, repeats,  ms);
     }
 
-    private void initialize(AuraBox<?> component, float initialX, float initialY, int intensity, int ms){
+    private void initialize(AuraBox<?> component, float initialX, float initialY, int intensity, int repeats, int ms){
 
         setup(0, 0, 0, value -> {}, component, TransitionType.LINEAR);
 
         component.anchor(1f, 1f);
 
-        AnimateRotation t1 = new AnimateRotation(component, intensity / 2, ms / 2).then(() ->
-            component.anchor(0f, 1f)
-        ).pingPong();
+        Transition<?> current = this;
 
-        AnimateRotation t2 = new AnimateRotation(component, -intensity / 3, ms / 3).then(() -> {
-            component.anchor(1f, 1f);
-        }).pingPong();
+        for(int i = 1; i <= repeats; i ++){
 
-        t1.serie(t2);
+            int aX = (i + 1) % 2;
+            float angle = (float) Math.pow(-1, i + 1) * intensity / ( i / 1.2f);
+            angle = Math.min(angle, intensity);
 
-        AnimateRotation t3 = new AnimateRotation(component, intensity / 4, ms / 4).then(() -> {
+            AnimateRotation t = new AnimateRotation(component, angle, ms / (i + 1)).then(() -> {
+                component.anchor(aX, 1f);
+            }).pingPong();
+
+            current.serie(t);
+            current = t;
+
+        }
+
+        current.then(() -> {
             component.anchor(initialX, initialY);
-        }).pingPong();
-
-        t2.serie(t3);
-
-        animationType(AnimationType.ROTATE);
-
-        serie(t1);
+        });
 
     }
     

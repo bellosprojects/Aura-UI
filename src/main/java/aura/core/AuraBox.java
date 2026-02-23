@@ -117,37 +117,54 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
 
     protected void addMouseEvents(){
 
-        AuraBox<T> self = this;
-
         MouseAdapter mouseHandler = new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e){
-                if(checkHover(e.getPoint())){
-                    updateHover(!isHovered);
-                    for(HoverAction<T> action : hoverActions){
-                        action.onHover((T) self , isHovered);
-                    }
-                }
-            }
-            @Override
-            public void mouseExited(MouseEvent e) {
-                updateHover(false);
-                for(HoverAction<T> action : hoverActions){
-                    action.onHover((T) self , false);
-                }
+                checkHover(e.getPoint());
             }
             @Override
             public void mouseReleased(MouseEvent e){
-                if(checkClick(e.getPoint())){
-                    for(ClickAction<T> action : clickActions){
-                        action.onClick((T) self);
-                    }
+                checkClick(e.getPoint());
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+                Point p = e.getPoint();
+
+                Point adjustedPoint = new Point(
+                    (int)(p.x - offsetX),
+                    (int)(p.y - offsetY)
+                );
+
+                if(shapePath == null || !shapePath.contains(adjustedPoint)){
+                    updateHover(false);
+                    playHovers(false);
                 }
             }
+            
         };
 
         addMouseListener(mouseHandler);
         addMouseMotionListener(mouseHandler);
+    }
+
+    public void playClicks(){
+
+        AuraBox<T> self = this;
+
+        for(ClickAction<T> action : clickActions){
+            action.onClick((T) self);
+        }
+    }
+
+    public void playHovers(boolean hover){
+
+        AuraBox<T> self = this;
+
+        for(HoverAction<T> action : hoverActions){
+            action.onHover((T) self , hover);
+        }
     }
 
     public T onClick(ClickAction<T> action){
@@ -292,17 +309,24 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         return this.scale;
     }
 
-    protected boolean checkClick(Point p){
+    @Override
+    public boolean contains(Point p) {
+        return (shapePath != null && shapePath.contains(p));
+    }
+
+    protected void checkClick(Point p){
 
         Point adjustedPoint = new Point(
             (int)(p.x - offsetX),
             (int)(p.y - offsetY)
         );
 
-        return (shapePath != null && shapePath.contains(adjustedPoint));
+        if(shapePath != null && shapePath.contains(adjustedPoint)){
+            playClicks();
+        }
     }
 
-    protected boolean checkHover(Point p){
+    protected void checkHover(Point p){
 
         Point adjustedPoint = new Point(
             (int)(p.x - offsetX),
@@ -310,7 +334,10 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         );
 
         boolean contains = (shapePath != null && shapePath.contains(adjustedPoint));
-        return contains != isHovered;
+        if(contains != isHovered){
+            updateHover(contains);
+            playHovers(contains);
+        }
     }
 
     protected void updateHover(boolean hover){
@@ -516,7 +543,10 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         BoxUtils.setHighQuality(gStroke);
         gStroke.setPaint(StrokeColor);
 
-
+        x -= margin[1];
+        y -= margin[0];
+        width += margin[3] + margin[1];
+        height += margin[2] + margin[0];
         float cX = x + (width) / 2f;
         float cY = y + (height) / 2f;
 
@@ -543,7 +573,6 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         Graphics2D g2 = (Graphics2D) g.create();
         BoxUtils.setHighQuality(g2);
         
-        g2.translate(offsetX, offsetY);
         
         
         if (scale != 1.0f || angle != 1.0f) {
@@ -585,7 +614,7 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         } else {
             shapePath.quadTo(x + width, y + height, x + width - radios[3], y + height); // BR
         }
-
+        
         shapePath.lineTo(x + radios[2], y + height); // Bottom
         
         if(this.flatCorners[2]){
@@ -601,10 +630,13 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
         } else {
             shapePath.quadTo(x, y, x + radios[0], y); // TL
         }
-
+        g2.translate(offsetX, offsetY);
+        
         if(getParent() instanceof AuraBox){
             AuraBox<?> parent = (AuraBox<?>) getParent();
             g2.setClip(parent.getClipChild()? g2.getClip() : null);
+        } else {
+            g2.setClip(null);
         }
         
         Color[] colors = new Color[this.backgroundColors.size()];
@@ -662,7 +694,6 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
             Graphics2D gImg = (Graphics2D) g2.create();
             BoxUtils.setHighQuality(gImg);
             
-            
             gImg.setClip(shapePath);
             
             if(scaleBackground){
@@ -670,20 +701,20 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
             } else {
                 gImg.drawImage(backgroundImage, 0, 0, this);
             }
-
+            
         } else {
             g2.fill(shapePath);
         }
         
         drawStrokes(g2, shapePath, x, y, width, height);
-
+        
         g2.dispose();
     }
-
+    
     public T padding(int all){
         return padding(all, all, all, all);
     }
-
+    
     public T padding(int top_bottom, int left_right){
         return padding(top_bottom, left_right, top_bottom, left_right);
     }
@@ -895,49 +926,63 @@ public abstract class AuraBox<T extends AuraBox<T>> extends JPanel {
     }
 
     private AuraBox<?> info;
-
-    public T info(AuraBox<?> boxInfo){
-        return info(boxInfo, 0, 0);
-    }
+    private float[] infoIn;
 
     public T info(AuraBox<?> boxInfo, float sx, float sy){
+        return info(boxInfo, sx, sy, 0, 0);
+    }
+
+    public T info(AuraBox<?> boxInfo){
+        return info(boxInfo, 0, 1, 0, 0);
+    }
+
+    public T info(AuraBox<?> boxInfo, float sx, float sy, float tx, float ty){
         this.info = boxInfo;
+        this.infoIn = new float[]{sx, sy, tx, ty};
 
-        AnimateOpacity fadeOut = new AnimateOpacity(boxInfo, 0f, 300).then(() -> boxInfo.setVisible(false));
-        boxInfo.opacity(0f);
-        boxInfo.setVisible(false);
 
-        SwingUtilities.invokeLater(() -> {
+        info.opacity(0);
+        onHover((self, shover) -> {
 
-            AuraWindow window = (AuraWindow) SwingUtilities.getWindowAncestor(this);
-
-            Point location = SwingUtilities.convertPoint(this, (int)(getWidth() * sx), (int)(getHeight() * sy), window.getLayeredPane());
-
-            boxInfo.setBounds(location.x, location.y - boxInfo.getPreferredSize().height - 5, boxInfo.getPreferredSize().width, boxInfo.getPreferredSize().height);
-
-            window.getLayeredPane().add(boxInfo, JLayeredPane.POPUP_LAYER);
-        });
-
-        AnimateOpacity fadeIn = new AnimateOpacity(boxInfo, 1f, 300);
-        
-
-        onHover((self, hover) -> {
-            
-            if(hover){
-
-                boxInfo.setVisible(true);
-                fadeIn.start();
-
-            } else {
-                fadeOut.start();
-            }
+            manageInfo(shover);
 
         });
 
         return (T) this;
     }
 
+    private void manageInfo(boolean hover){
+
+        AuraWindow window = BoxUtils.getAuraWindow(this);
+                
+        Point location = SwingUtilities.convertPoint(this, (int) (infoIn[0] * (this.getWidth() - getMargin().left - getMargin().right)), (int) (infoIn[1] * (this.getHeight() - getMargin().bottom - getMargin().top)), window.getLayeredPane());
+
+        location.x += this.getMargin().left;
+        location.y += this.getMargin().top;
+
+        if(hover){
+
+            info.setBounds(location.x - (int) (infoIn[2] * (info.getPreferredSize().width)), location.y - (int) (infoIn[3] * (info.getPreferredSize().height)), info.getPreferredSize().width, info.getPreferredSize().height);
+            window.getLayeredPane().add(info, JLayeredPane.POPUP_LAYER);
+            new AnimateOpacity(info, 1, 300).start();
+
+
+        } else {
+            
+                new AnimateOpacity(info, 0, 300).then(() -> {
+                    window.getLayeredPane().remove(info);
+                    window.getLayeredPane().repaint();
+                    info.opacity(0);
+                }).start();
+
+        }
+
+        window.getLayeredPane().repaint();
+
+    }
+
     public AuraBox<?> getInfo(){
         return this.info;
     }
+
 }
